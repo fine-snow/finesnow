@@ -1,5 +1,5 @@
 package main
 
 func main() {
-	println("Hello, FineSnow")
+	println("Hello, fine snow")
 }
