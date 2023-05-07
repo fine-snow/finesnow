@@ -61,7 +61,7 @@ func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
 			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			rm.hct = textPlain
 		case reflect.Struct:
-			rm.hct = textPlain
+			rm.hct = applicationJson
 		default:
 			rm.hct = textPlain
 		}
