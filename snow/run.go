@@ -1,6 +1,6 @@
 // Framework Launch Method
 
-package rain
+package snow
 
 import (
 	"github.com/fine-snow/finesnow/handler"
