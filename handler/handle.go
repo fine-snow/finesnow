@@ -22,10 +22,8 @@ const (
 
 // Handle Http Request Receive Processing Abstract Interface
 // ServeHTTP The method of processing HTTP requests at the bottom of Golang.
-// SetIntercept Set global interceptor method.
 type Handle interface {
 	ServeHTTP(http.ResponseWriter, *http.Request)
-	SetIntercept(Interceptor)
 }
 
 // globalHandle HTTP Request Receiving And Processing Abstract Interface Implementation Body
@@ -34,16 +32,13 @@ type globalHandle struct {
 	intercept Interceptor
 }
 
-func NewHandle() Handle {
-	return &globalHandle{}
-}
-
-func (gh *globalHandle) SetIntercept(intercept Interceptor) {
+func NewHandle(intercept Interceptor) http.Handler {
 	// If the interceptor parameter passed in by the startup method is empty, supplement the default interceptor method
 	if intercept == nil {
 		intercept = defaultInterceptor
 	}
-	gh.intercept = intercept
+	handle := allowCORS(&globalHandle{intercept})
+	return handle
 }
 
 func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,9 +56,6 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if !gh.intercept(w, r) {
 		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	if r.Method == router.HttpMethodOptions {
 		return
 	}
 	defer catchPanic(w)
