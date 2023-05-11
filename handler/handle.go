@@ -69,7 +69,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == string(*router.HttpMethodGet) {
-		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), r.URL.Query(), nil))
+		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), r.URL.Query(), nil, w, r))
 		if outParam == nil {
 			return
 		}
@@ -103,7 +103,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	multipartForm := r.MultipartForm
 	if multipartForm != nil {
-		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), multipartForm.Value, multipartForm.File))
+		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), multipartForm.Value, multipartForm.File, w, r))
 		if outParam == nil {
 			return
 		}
@@ -113,7 +113,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	postForm := r.PostForm
 	if postForm != nil {
-		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), postForm, nil))
+		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), postForm, nil, w, r))
 		if outParam == nil {
 			return
 		}
