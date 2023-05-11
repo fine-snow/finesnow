@@ -51,7 +51,7 @@ func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
 	}
 	t := reflect.TypeOf(fun)
 	checkFun(t)
-	rm := &routeModel{hm: HttpMethodPost, t: t}
+	rm := &routeModel{hm: HttpMethodPost, t: t, hct: textPlain}
 	if t.NumOut() > 0 {
 		switch t.Out(0).Kind() {
 		case reflect.Bool,
@@ -70,19 +70,26 @@ func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
 	if t.NumIn() > 0 {
 		pc := rm.v.Pointer()
 		funPc := runtime.FuncForPC(pc)
-		funcName := strings.Split(funPc.Name(), ".")[1]
+		split := strings.Split(funPc.Name(), ".")
+		funcName := split[len(split)-1]
 		fileName, _ := funPc.FileLine(pc)
 		var af *ast.File
 		if f, ok := astFileMap[fileName]; ok {
 			af = f
 		} else {
-			af, _ = parser.ParseFile(fest, fileName, nil, parser.AllErrors)
+			af, _ = parser.ParseFile(fest, fileName, nil, parser.ParseComments)
 			astFileMap[fileName] = af
 		}
 		var funcDecl *ast.FuncDecl
 		ast.Inspect(af, func(n ast.Node) bool {
 			if fd, ok := n.(*ast.FuncDecl); ok && fd.Name.Name == funcName {
 				funcDecl = fd
+				//doc := fd.Doc
+				//if doc != nil && len(doc.List) > 0 {
+				//	for _, c := range doc.List {
+				//		fmt.Println(c.Text)
+				//	}
+				//}
 				return false
 			}
 			return true
