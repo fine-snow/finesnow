@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"runtime"
 	"strconv"
+	"strings"
 )
 
 // convertToByteArray Convert the reflection.Value of a value into a byte array
@@ -48,38 +49,48 @@ func catchPanic(w http.ResponseWriter) {
 type Files map[string][]*multipart.FileHeader
 
 // dealInParam Http request input processing method
-func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files Files) []reflect.Value {
+func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files Files, w http.ResponseWriter, r *http.Request) []reflect.Value {
 	var in []reflect.Value
 	for i, k := range paramNames {
 		t := rt.In(i)
-		if t.String() == "*multipart.FileHeader" {
-			headers := files[k]
-			if headers != nil {
-				in = append(in, reflect.ValueOf(headers[0]))
-			} else {
-				in = append(in, reflect.ValueOf(&multipart.FileHeader{}))
+		if strings.Contains(t.String(), "multipart.FileHeader") {
+			if t.String() == "*multipart.FileHeader" {
+				headers := files[k]
+				if headers != nil {
+					in = append(in, reflect.ValueOf(headers[0]))
+				} else {
+					in = append(in, reflect.ValueOf(&multipart.FileHeader{}))
+				}
+				continue
 			}
+			if t.String() == "[]*multipart.FileHeader" {
+				in = append(in, reflect.ValueOf(files[k]))
+				continue
+			}
+			if t.String() == "multipart.FileHeader" {
+				headers := files[k]
+				if headers != nil {
+					in = append(in, reflect.ValueOf(*(headers[0])))
+				} else {
+					in = append(in, reflect.ValueOf(multipart.FileHeader{}))
+				}
+				continue
+			}
+			if t.String() == "[]multipart.FileHeader" {
+				var fs []multipart.FileHeader
+				for _, f := range files[k] {
+					fs = append(fs, *f)
+				}
+				in = append(in, reflect.ValueOf(fs))
+				continue
+			}
+		}
+		if t.String() == "http.ResponseWriter" {
+			in = append(in, reflect.ValueOf(w))
 			continue
 		}
-		if t.String() == "multipart.FileHeader" {
-			headers := files[k]
-			if headers != nil {
-				in = append(in, reflect.ValueOf(*(headers[0])))
-			} else {
-				in = append(in, reflect.ValueOf(multipart.FileHeader{}))
-			}
-			continue
-		}
-		if t.String() == "[]*multipart.FileHeader" {
-			in = append(in, reflect.ValueOf(files[k]))
-			continue
-		}
-		if t.String() == "[]multipart.FileHeader" {
-			var fs []multipart.FileHeader
-			for _, f := range files[k] {
-				fs = append(fs, *f)
-			}
-			in = append(in, reflect.ValueOf(fs))
+		if t.String() == "*http.Request" {
+			in = append(in, reflect.ValueOf(r))
 			continue
 		}
 		switch t.Kind() {
