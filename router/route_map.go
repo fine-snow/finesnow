@@ -84,7 +84,7 @@ func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
 		ast.Inspect(af, func(n ast.Node) bool {
 			if fd, ok := n.(*ast.FuncDecl); ok && fd.Name.Name == funcName {
 				funcDecl = fd
-				// TODO 解析接口注释生成文档模型
+				// TODO Parsing interface annotations generates document models
 				//doc := fd.Doc
 				//if doc != nil && len(doc.List) > 0 {
 				//	for _, c := range doc.List {
