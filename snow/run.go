@@ -3,6 +3,7 @@
 package snow
 
 import (
+	"fmt"
 	"github.com/fine-snow/finesnow/doc"
 	"github.com/fine-snow/finesnow/handler"
 	"net/http"
@@ -17,6 +18,7 @@ func Run(addr string, intercept handler.Interceptor) {
 	}
 	handle := handler.NewHandle(intercept)
 	http.Handle("/", handle)
+	fmt.Println("\n    _______           _____                    \n   / ____(_)___  ___ / ___/____  ____ _      __\n  / /_  / / __ \\/ _ \\\\__ \\/ __ \\/ __ \\ | /| / /\n / __/ / / / / /  __/__/ / / / / /_/ / |/ |/ / \n/_/   /_/_/ /_/\\___/____/_/ /_/\\____/|__/|__/  \n                                               ")
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		panic(err)
