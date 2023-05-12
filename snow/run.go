@@ -14,7 +14,7 @@ import (
 // intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil
 func Run(addr string, intercept handler.Interceptor) {
 	if doc.GetEnableApiDoc() {
-		AddGetRoute("/apiDoc", doc.ApiDoc)
+		doc.HandleDoc()
 	}
 	handle := handler.NewHandle(intercept)
 	http.Handle("/", handle)
