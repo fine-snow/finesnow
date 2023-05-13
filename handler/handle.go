@@ -83,14 +83,25 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		pt := route.GetType().In(0)
-		pointer := reflect.New(pt)
-		err = json.Unmarshal(body, pointer.Interface())
-		if err != nil {
-			panic(err)
-		}
+		rt := route.GetType()
 		var in []reflect.Value
-		in = append(in, pointer.Elem())
+		for i := 0; i < rt.NumIn(); i++ {
+			t := rt.In(i)
+			if t.String() == "*http.Request" {
+				in = append(in, reflect.ValueOf(r))
+				continue
+			}
+			if t.String() == "http.ResponseWriter" {
+				in = append(in, reflect.ValueOf(w))
+				continue
+			}
+			pointer := reflect.New(t)
+			err = json.Unmarshal(body, pointer.Interface())
+			if err != nil {
+				panic(err)
+			}
+			in = append(in, pointer.Elem())
+		}
 		outParam := route.GetValue().Call(in)
 		if outParam == nil {
 			return
