@@ -2,21 +2,27 @@
 
 package doc
 
-type apiModel struct {
+type ApiJson struct {
+	Api  []*ApiModel
+	Name string
+	Url  string
+}
+
+type ApiModel struct {
 	Group          string      `json:"group"`
 	Module         string      `json:"module"`
 	Name           string      `json:"name"`
 	Url            string      `json:"url"`
 	MethodType     string      `json:"methodType"`
 	IsJsonTransfer bool        `json:"isJsonTransfer"`
-	Params         []apiParam  `json:"params"`
-	Results        []apiResult `json:"results"`
+	Params         []ApiParam  `json:"params"`
+	Results        []ApiResult `json:"results"`
 }
 
-type apiParam struct {
-	name string
+type ApiParam struct {
+	Name string
 }
 
-type apiResult struct {
-	name string
+type ApiResult struct {
+	Name string
 }

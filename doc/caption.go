@@ -10,12 +10,18 @@ import (
 
 var enableApiDoc = false
 
+var IsApiJson *ApiJson
+
 func GetEnableApiDoc() bool {
 	return enableApiDoc
 }
 
 func EnableApiDoc() {
 	enableApiDoc = true
+}
+
+func GetApiJson() *ApiJson {
+	return IsApiJson
 }
 
 func HandleDoc() {
