@@ -4,6 +4,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -85,12 +86,12 @@ func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
 			if fd, ok := n.(*ast.FuncDecl); ok && fd.Name.Name == funcName {
 				funcDecl = fd
 				// TODO Parsing interface annotations generates document models
-				//doc := fd.Doc
-				//if doc != nil && len(doc.List) > 0 {
-				//	for _, c := range doc.List {
-				//		fmt.Println(c.Text)
-				//	}
-				//}
+				doc := fd.Doc
+				if doc != nil && len(doc.List) > 0 {
+					for _, c := range doc.List {
+						fmt.Println(c.Text)
+					}
+				}
 				return false
 			}
 			return true

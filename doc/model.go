@@ -26,3 +26,7 @@ type ApiParam struct {
 type ApiResult struct {
 	Name string
 }
+
+func ParsingAPIFunctionAnnotations() {
+
+}
