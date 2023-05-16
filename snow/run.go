@@ -15,6 +15,7 @@ import (
 func Run(addr string, intercept handler.Interceptor) {
 	if doc.GetEnableApiDoc() {
 		doc.HandleDoc()
+		AddGetRoute("/getApiJson", doc.GetApiJson)
 	}
 	handle := handler.NewHandle(intercept)
 	http.Handle("/", handle)
