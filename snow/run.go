@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/fine-snow/finesnow/doc"
 	"github.com/fine-snow/finesnow/handler"
+	"github.com/fine-snow/finesnow/logger"
 	"net/http"
 )
 
@@ -13,6 +14,7 @@ import (
 // addr Start address parameter, for example: 127.0.0.1:8088
 // intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil
 func Run(addr string, intercept handler.Interceptor) {
+	defer logger.CheckLogChan()
 	if doc.GetEnableApiDoc() {
 		doc.HandleDoc()
 		AddGetRoute("/getApiJson", doc.GetApiJson)

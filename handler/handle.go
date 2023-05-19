@@ -4,6 +4,7 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/fine-snow/finesnow/logger"
 	"github.com/fine-snow/finesnow/router"
 	"io"
 	"net/http"
@@ -18,6 +19,7 @@ import (
 const (
 	contentType       = "Content-Type"
 	maxMemory   int64 = 1048576
+	success           = "success"
 )
 
 // Handle Http Request Receive Processing Abstract Interface
@@ -42,38 +44,49 @@ func NewHandle(intercept Interceptor) http.Handler {
 }
 
 func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	route := router.Get(r.URL.Path)
+	path := r.URL.Path
+	method := r.Method
+	route := router.Get(path)
 	if route == nil {
+		text := http.StatusText(http.StatusNotFound)
+		logger.ERROR(strings.Join([]string{path, method, text}, ", "))
 		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(http.StatusText(http.StatusNotFound)))
+		_, _ = w.Write([]byte(text))
 		return
 	}
-	if r.Method != string(*(route.GetHttpMethod())) {
+	if method != string(*(route.GetHttpMethod())) {
+		text := http.StatusText(http.StatusMethodNotAllowed)
+		logger.ERROR(strings.Join([]string{path, method, text}, ", "))
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		_, _ = w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
+		_, _ = w.Write([]byte(text))
 		return
 	}
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if !gh.intercept(w, r) {
+		logger.ERROR(strings.Join([]string{path, method, http.StatusText(http.StatusForbidden)}, ", "))
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	defer catchPanic(w)
+	defer catchPanic(w, path, method)
 	if route.GetType().NumIn() == 0 {
 		outParam := route.GetValue().Call(nil)
 		if outParam == nil {
+			logger.INFO(strings.Join([]string{path, method, success}, ", "))
 			return
 		}
 		_, _ = w.Write(convertToByteArray(outParam[0]))
+		logger.INFO(strings.Join([]string{path, method, success}, ", "))
 		return
 	}
 
-	if r.Method == string(*router.HttpMethodGet) {
+	if method == string(*router.HttpMethodGet) {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), r.URL.Query(), nil, w, r))
 		if outParam == nil {
+			logger.INFO(strings.Join([]string{path, method, success}, ", "))
 			return
 		}
 		_, _ = w.Write(convertToByteArray(outParam[0]))
+		logger.INFO(strings.Join([]string{path, method, success}, ", "))
 		return
 	}
 
@@ -104,9 +117,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		outParam := route.GetValue().Call(in)
 		if outParam == nil {
+			logger.INFO(strings.Join([]string{path, method, success}, ", "))
 			return
 		}
 		_, _ = w.Write(convertToByteArray(outParam[0]))
+		logger.INFO(strings.Join([]string{path, method, success}, ", "))
 		return
 	}
 
@@ -116,9 +131,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if multipartForm != nil {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), multipartForm.Value, multipartForm.File, w, r))
 		if outParam == nil {
+			logger.INFO(strings.Join([]string{path, method, success}, ", "))
 			return
 		}
 		_, _ = w.Write(convertToByteArray(outParam[0]))
+		logger.INFO(strings.Join([]string{path, method, success}, ", "))
 		return
 	}
 
@@ -126,9 +143,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if postForm != nil {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), postForm, nil, w, r))
 		if outParam == nil {
+			logger.INFO(strings.Join([]string{path, method, success}, ", "))
 			return
 		}
 		_, _ = w.Write(convertToByteArray(outParam[0]))
+		logger.INFO(strings.Join([]string{path, method, success}, ", "))
 		return
 	}
 }
