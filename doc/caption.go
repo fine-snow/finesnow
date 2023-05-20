@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// enableApiDoc Enable the interface document feature identification
 var enableApiDoc = false
 
 var IsApiJson *ApiJson
