@@ -43,6 +43,7 @@ func logServer() {
 	}
 }
 
+// init
 func init() {
 	go logServer()
 	_, err := os.Stat("./log")
