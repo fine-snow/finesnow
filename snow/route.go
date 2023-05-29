@@ -13,3 +13,7 @@ func AddGetRoute(url string, fun interface{}) {
 func AddPostRoute(url string, fun interface{}) {
 	router.AddRoute(url, fun, router.HttpMethodPost)
 }
+
+func AddPutRoute(url string, fun interface{}) {
+	router.AddRoute(url, fun, router.HttpMethodPut)
+}
