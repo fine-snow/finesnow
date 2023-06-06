@@ -48,7 +48,7 @@ func init() {
 	go logServer()
 	_, err := os.Stat("./log")
 	if err != nil {
-		os.Mkdir("log", 0777)
+		_ = os.Mkdir("log", 0777)
 	}
 	// Initialize Log Service parameters
 	infoFile, _ = os.OpenFile("./log/snow-info.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
