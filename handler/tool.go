@@ -4,7 +4,6 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/fine-snow/finesnow/logger"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -40,11 +39,9 @@ func catchPanic(w http.ResponseWriter, path, method string) {
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
-			logger.ERROR(strings.Join([]string{path, method, err.(runtime.Error).Error()}, ", "))
 			_, _ = w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		default:
 			errBytes := convertToByteArray(reflect.ValueOf(err))
-			logger.ERROR(strings.Join([]string{path, method, string(errBytes)}, ", "))
 			_, _ = w.Write(errBytes)
 		}
 	}
