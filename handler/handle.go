@@ -18,7 +18,6 @@ import (
 const (
 	contentType       = "Content-Type"
 	maxMemory   int64 = 1048576
-	success           = "success"
 )
 
 // Handle Http Request Receive Processing Abstract Interface
