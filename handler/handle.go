@@ -71,7 +71,6 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
-
 	if method == string(*router.HttpMethodGet) {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), r.URL.Query(), nil, w, r))
 		if outParam == nil {
@@ -80,7 +79,6 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
-
 	ct := r.Header.Get(contentType)
 	if strings.Contains(ct, "application/json") {
 		body, err := io.ReadAll(r.Body)
@@ -113,9 +111,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
-
 	_ = r.ParseMultipartForm(maxMemory)
-
 	multipartForm := r.MultipartForm
 	if multipartForm != nil {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), multipartForm.Value, multipartForm.File, w, r))
@@ -125,7 +121,6 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
-
 	postForm := r.PostForm
 	if postForm != nil {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), postForm, nil, w, r))
