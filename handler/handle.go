@@ -44,7 +44,7 @@ func NewHandle(intercept Interceptor) http.Handler {
 func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
-	route := router.Get(path)
+	route := router.Get(path, method)
 	if route == nil {
 		text := http.StatusText(http.StatusNotFound)
 		w.WriteHeader(http.StatusNotFound)
