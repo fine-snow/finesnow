@@ -18,13 +18,17 @@ var (
 	errRouteAddNotFunc          = errors.New("the route mapping add function 'fun' parameter value is not a function")
 	errRouteFuncOutAbnormal     = errors.New("the route mapping add function 'fun' parameter value function return value amount is greater than 1")
 	errRouteDuplicateDefinition = errors.New("duplicate definition of routing path")
+	errRouteNoHttpMethod        = errors.New("there is no maintenance routing HTTP request type")
+	errRouteUrlIsNilOrSlash     = errors.New("the route url cannot be null character or '/'")
+
+	fest       = token.NewFileSet()
+	astFileMap = make(map[string]*ast.File)
+
+	getRouteModelMap    = make(map[string]RouteModel)
+	postRouteModelMap   = make(map[string]RouteModel)
+	putRouteModelMap    = make(map[string]RouteModel)
+	deleteRouteModelMap = make(map[string]RouteModel)
 )
-
-var fest = token.NewFileSet()
-
-var astFileMap = make(map[string]*ast.File)
-
-var routeModelMap = make(map[string]RouteModel)
 
 func checkFun(t reflect.Type) {
 	if t.Kind() != reflect.Func {
@@ -35,24 +39,79 @@ func checkFun(t reflect.Type) {
 	}
 }
 
-func put(url string, rm RouteModel) {
-	if _, ok := routeModelMap[url]; ok {
+func put(url string, rm RouteModel, m map[string]RouteModel) {
+	if _, ok := m[url]; ok {
 		panic(errRouteDuplicateDefinition)
 	}
-	routeModelMap[url] = rm
+	m[url] = rm
 }
 
-func Get(url string) RouteModel {
-	return routeModelMap[url]
+func dynamicRoute(url string) {
+	parts := strings.Split(url, slash)
+	trieRouteTree.insert(parts, url, 0)
 }
 
-func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
+func putSelect(url string, rm RouteModel) {
+	switch rm.GetHttpMethod() {
+	case HttpMethodGet:
+		put(url, rm, getRouteModelMap)
+		dynamicRoute(url)
+	case HttpMethodPost:
+		put(url, rm, postRouteModelMap)
+	case HttpMethodPut:
+		put(url, rm, putRouteModelMap)
+	case HttpMethodDelete:
+		put(url, rm, deleteRouteModelMap)
+	}
+}
+
+func Get(url, method string) RouteModel {
+	switch method {
+	case string(*HttpMethodGet):
+		return getRouteModelMap[url]
+	case string(*HttpMethodPost):
+		return postRouteModelMap[url]
+	case string(*HttpMethodPut):
+		return putRouteModelMap[url]
+	case string(*HttpMethodDelete):
+		return deleteRouteModelMap[url]
+	default:
+		return nil
+	}
+}
+
+func dealPrefixSlash(url string) string {
+	if strings.HasPrefix(url, slash) {
+		return dealPrefixSlash(url[1:])
+	} else {
+		return slash + url
+	}
+}
+
+func dealSuffixSlash(url string) string {
+	if strings.HasSuffix(url, slash) {
+		return dealSuffixSlash(url[:len(url)-1])
+	} else {
+		return url
+	}
+}
+
+func AddRoute(url string, fun interface{}, hms *httpMethod) {
+	url = strings.ReplaceAll(url, " ", "")
+	url = dealPrefixSlash(url)
+	url = dealSuffixSlash(url)
+	if url == "" || url == slash {
+		panic(errRouteUrlIsNilOrSlash)
+	}
 	if fun == nil {
 		panic(errRouteFuncIsNil)
 	}
+	if hms == nil {
+		panic(errRouteNoHttpMethod)
+	}
 	t := reflect.TypeOf(fun)
 	checkFun(t)
-	rm := &routeModel{hm: HttpMethodPost, t: t, hct: textPlain}
+	rm := &routeModel{hm: hms, t: t, hct: textPlain}
 	if t.NumOut() > 0 {
 		switch t.Out(0).Kind() {
 		case reflect.Bool,
@@ -102,8 +161,5 @@ func AddRoute(url string, fun interface{}, hms ...*httpMethod) {
 		}
 		rm.paramNames = paramNames
 	}
-	if len(hms) > 0 {
-		rm.hm = hms[0]
-	}
-	put(url, rm)
+	putSelect(url, rm)
 }
