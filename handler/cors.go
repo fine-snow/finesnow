@@ -3,6 +3,7 @@
 package handler
 
 import (
+	"github.com/fine-snow/finesnow/constant"
 	"github.com/fine-snow/finesnow/router"
 	"net/http"
 	"strings"
@@ -30,12 +31,12 @@ func allowCORS(next http.Handler) http.Handler {
 		origin := r.Header.Get("Origin")
 		if origin != "" {
 			// Set CORS headers on response
-			w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, ","))
-			w.Header().Set("Access-Control-Allow-Headers", strings.Join(allowedHeaders, ","))
+			w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, constant.Comma))
+			w.Header().Set("Access-Control-Allow-Headers", strings.Join(allowedHeaders, constant.Comma))
 			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 			// Handle preflight request
 			if r.Method == router.HttpMethodOptions {
-				w.Header().Set("Allow", strings.Join(allowedMethods, ","))
+				w.Header().Set("Allow", strings.Join(allowedMethods, constant.Comma))
 				w.Header().Set("Max-Age", "3600")
 				w.WriteHeader(http.StatusNoContent)
 				return

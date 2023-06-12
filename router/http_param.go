@@ -15,8 +15,6 @@ var (
 	applicationJson   = new(httpContentType)
 )
 
-const slash = "/"
-
 func init() {
 	*HttpMethodGet = "GET"
 	*HttpMethodPost = "POST"

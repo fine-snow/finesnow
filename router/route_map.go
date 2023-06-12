@@ -5,9 +5,11 @@ package router
 import (
 	"errors"
 	"fmt"
+	"github.com/fine-snow/finesnow/constant"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"net/http"
 	"reflect"
 	"runtime"
 	"strings"
@@ -47,8 +49,8 @@ func put(url string, rm RouteModel, m map[string]RouteModel) {
 }
 
 func dynamicRoute(url string) {
-	parts := strings.Split(url, slash)
-	trieRouteTree.insert(parts, url, 0)
+	parts := strings.Split(url, constant.Slash)
+	trieRouteTree.insert(parts[1:], 0)
 }
 
 func putSelect(url string, rm RouteModel) {
@@ -65,10 +67,15 @@ func putSelect(url string, rm RouteModel) {
 	}
 }
 
-func Get(url, method string) RouteModel {
+func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
 	case string(*HttpMethodGet):
-		return getRouteModelMap[url]
+		parts := strings.Split(url, constant.Slash)
+		realUrl := trieRouteTree.search(parts[1:], 0, r)
+		if realUrl == "" {
+			return nil
+		}
+		return getRouteModelMap[realUrl]
 	case string(*HttpMethodPost):
 		return postRouteModelMap[url]
 	case string(*HttpMethodPut):
@@ -81,15 +88,15 @@ func Get(url, method string) RouteModel {
 }
 
 func dealPrefixSlash(url string) string {
-	if strings.HasPrefix(url, slash) {
+	if strings.HasPrefix(url, constant.Slash) {
 		return dealPrefixSlash(url[1:])
 	} else {
-		return slash + url
+		return constant.Slash + url
 	}
 }
 
 func dealSuffixSlash(url string) string {
-	if strings.HasSuffix(url, slash) {
+	if strings.HasSuffix(url, constant.Slash) {
 		return dealSuffixSlash(url[:len(url)-1])
 	} else {
 		return url
@@ -97,10 +104,10 @@ func dealSuffixSlash(url string) string {
 }
 
 func AddRoute(url string, fun interface{}, hms *httpMethod) {
-	url = strings.ReplaceAll(url, " ", "")
+	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
 	url = dealPrefixSlash(url)
 	url = dealSuffixSlash(url)
-	if url == "" || url == slash {
+	if url == constant.NullStr || url == constant.Slash {
 		panic(errRouteUrlIsNilOrSlash)
 	}
 	if fun == nil {
@@ -130,7 +137,7 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 	if t.NumIn() > 0 {
 		pc := rm.v.Pointer()
 		funPc := runtime.FuncForPC(pc)
-		split := strings.Split(funPc.Name(), ".")
+		split := strings.Split(funPc.Name(), constant.Dot)
 		funcName := split[len(split)-1]
 		fileName, _ := funPc.FileLine(pc)
 		var af *ast.File
