@@ -2,9 +2,12 @@
 
 package router
 
-import "strings"
+import (
+	"github.com/fine-snow/finesnow/constant"
+	"net/http"
+)
 
-var trieRouteTree = node{url: slash, part: slash, children: make([]*node, 0), isVar: false}
+var trieRouteTree = node{url: constant.NullStr, part: constant.NullStr, children: make([]*node, 0), isVar: false}
 
 type node struct {
 	url      string
@@ -13,32 +16,41 @@ type node struct {
 	isVar    bool
 }
 
-func (n *node) insert(parts []string, url string, depth int) {
+func (n *node) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
 	if nd == nil {
-		nd = &node{url: strings.Join([]string{n.url, part}, slash), part: part, isVar: part[0] == ':'}
+		nd = &node{url: n.url + constant.Slash + part, part: part, isVar: part[0] == constant.Colon}
 		n.children = append(n.children, nd)
 	}
-	nd.insert(parts, url, depth+1)
+	if len(parts) == (depth + 1) {
+		return
+	}
+	nd.insert(parts, depth+1)
 }
 
-func (n *node) search(parts []string, depth int) *node {
-	if len(parts) == depth {
-		if n.part == "" {
-			return nil
-		}
-		return n
-	}
+func (n *node) search(parts []string, depth int, r *http.Request) string {
 	part := parts[depth]
 	nodes := n.matchNodes(part)
-	for _, nd := range nodes {
-		next := nd.search(parts, depth+1)
-		if next != nil {
-			return next
+	if len(nodes) > 0 {
+		nd := nodes[0]
+		if nd.isVar {
+			if r.URL.RawQuery == constant.NullStr {
+				r.URL.Query().Set(nd.part[1:], part)
+				r.URL.RawQuery = nd.part[1:] + constant.EqualSign + part
+			} else {
+				r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + nd.part[1:] + constant.EqualSign + part
+			}
+		}
+		if len(parts) == (depth + 1) {
+			return nd.url
+		}
+		url := nd.search(parts, depth+1, r)
+		if url != "" {
+			return url
 		}
 	}
-	return nil
+	return ""
 }
 
 func (n *node) matchNode(part string) *node {
