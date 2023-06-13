@@ -29,7 +29,7 @@ func SetAllowedHeaders(s []string) {
 func allowCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if origin != "" {
+		if origin != constant.NullStr {
 			// Set CORS headers on response
 			w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, constant.Comma))
 			w.Header().Set("Access-Control-Allow-Headers", strings.Join(allowedHeaders, constant.Comma))

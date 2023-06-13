@@ -46,11 +46,11 @@ func (n *node) search(parts []string, depth int, r *http.Request) string {
 			return nd.url
 		}
 		url := nd.search(parts, depth+1, r)
-		if url != "" {
+		if url != constant.NullStr {
 			return url
 		}
 	}
-	return ""
+	return constant.NullStr
 }
 
 func (n *node) matchNode(part string) *node {

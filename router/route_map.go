@@ -72,7 +72,7 @@ func Get(url, method string, r *http.Request) RouteModel {
 	case string(*HttpMethodGet):
 		parts := strings.Split(url, constant.Slash)
 		realUrl := trieRouteTree.search(parts[1:], 0, r)
-		if realUrl == "" {
+		if realUrl == constant.NullStr {
 			return nil
 		}
 		return getRouteModelMap[realUrl]
