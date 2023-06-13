@@ -4,18 +4,18 @@ package router
 
 import (
 	"github.com/fine-snow/finesnow/constant"
-	"net/http"
 )
 
 // TrieRouteTreeAbstract Trie route tree node abstract
 type trieRouteTreeAbstract interface {
 	insert([]string, int)
-	search([]string, int, *http.Request) string
+	search([]string, int) string
 	matchNode(part string) trieRouteTreeAbstract
 	matchNodes(part string) []trieRouteTreeAbstract
 	getUrl() string
 	getPart() string
 	getIsVar() bool
+	setIsExist(bool)
 }
 
 // trieRouteTree Global trie route tree
@@ -30,11 +30,13 @@ var trieRouteTree trieRouteTreeAbstract = &node{
 // part Node Partial Routing Path
 // children Node Sub-node Collection
 // isVar Is the node part path a variable
+// isExist Does this segment of the route really exist
 type node struct {
 	url      string
 	part     string
 	children []trieRouteTreeAbstract
 	isVar    bool
+	isExist  bool
 }
 
 func (n *node) getUrl() string {
@@ -49,6 +51,10 @@ func (n *node) getIsVar() bool {
 	return n.isVar
 }
 
+func (n *node) setIsExist(b bool) {
+	n.isExist = b
+}
+
 func (n *node) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
@@ -57,28 +63,24 @@ func (n *node) insert(parts []string, depth int) {
 		n.children = append(n.children, nd)
 	}
 	if len(parts) == (depth + 1) {
+		nd.setIsExist(true)
 		return
 	}
 	nd.insert(parts, depth+1)
 }
 
-func (n *node) search(parts []string, depth int, r *http.Request) string {
+func (n *node) search(parts []string, depth int) string {
+	if len(parts) == depth {
+		if n.isExist {
+			return n.url
+		} else {
+			return constant.NullStr
+		}
+	}
 	part := parts[depth]
 	nodes := n.matchNodes(part)
-	if len(nodes) > 0 {
-		nd := nodes[0]
-		if nd.getIsVar() {
-			if r.URL.RawQuery == constant.NullStr {
-				r.URL.Query().Set(nd.getPart()[1:], part)
-				r.URL.RawQuery = nd.getPart()[1:] + constant.EqualSign + part
-			} else {
-				r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + nd.getPart()[1:] + constant.EqualSign + part
-			}
-		}
-		if len(parts) == (depth + 1) {
-			return nd.getUrl()
-		}
-		url := nd.search(parts, depth+1, r)
+	for _, nd := range nodes {
+		url := nd.search(parts, depth+1)
 		if url != constant.NullStr {
 			return url
 		}
@@ -88,7 +90,7 @@ func (n *node) search(parts []string, depth int, r *http.Request) string {
 
 func (n *node) matchNode(part string) trieRouteTreeAbstract {
 	for _, child := range n.children {
-		if child.getPart() == part || child.getIsVar() {
+		if child.getPart() == part {
 			return child
 		}
 	}
