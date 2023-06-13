@@ -26,6 +26,10 @@ var trieRouteTree trieRouteTreeAbstract = &node{
 	isVar:    false}
 
 // node Trie route tree node achieve
+// url Node Real Routing Path
+// part Node Partial Routing Path
+// children Node Sub-node Collection
+// isVar Is the node part path a variable
 type node struct {
 	url      string
 	part     string
