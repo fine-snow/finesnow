@@ -7,13 +7,42 @@ import (
 	"net/http"
 )
 
-var trieRouteTree = node{url: constant.NullStr, part: constant.NullStr, children: make([]*node, 0), isVar: false}
+// TrieRouteTreeAbstract Trie route tree node abstract
+type trieRouteTreeAbstract interface {
+	insert([]string, int)
+	search([]string, int, *http.Request) string
+	matchNode(part string) trieRouteTreeAbstract
+	matchNodes(part string) []trieRouteTreeAbstract
+	getUrl() string
+	getPart() string
+	getIsVar() bool
+}
 
+// trieRouteTree Global trie route tree
+var trieRouteTree trieRouteTreeAbstract = &node{
+	url:      constant.NullStr,
+	part:     constant.NullStr,
+	children: make([]trieRouteTreeAbstract, 0),
+	isVar:    false}
+
+// node Trie route tree node achieve
 type node struct {
 	url      string
 	part     string
-	children []*node
+	children []trieRouteTreeAbstract
 	isVar    bool
+}
+
+func (n *node) getUrl() string {
+	return n.url
+}
+
+func (n *node) getPart() string {
+	return n.part
+}
+
+func (n *node) getIsVar() bool {
+	return n.isVar
 }
 
 func (n *node) insert(parts []string, depth int) {
@@ -34,16 +63,16 @@ func (n *node) search(parts []string, depth int, r *http.Request) string {
 	nodes := n.matchNodes(part)
 	if len(nodes) > 0 {
 		nd := nodes[0]
-		if nd.isVar {
+		if nd.getIsVar() {
 			if r.URL.RawQuery == constant.NullStr {
-				r.URL.Query().Set(nd.part[1:], part)
-				r.URL.RawQuery = nd.part[1:] + constant.EqualSign + part
+				r.URL.Query().Set(nd.getPart()[1:], part)
+				r.URL.RawQuery = nd.getPart()[1:] + constant.EqualSign + part
 			} else {
-				r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + nd.part[1:] + constant.EqualSign + part
+				r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + nd.getPart()[1:] + constant.EqualSign + part
 			}
 		}
 		if len(parts) == (depth + 1) {
-			return nd.url
+			return nd.getUrl()
 		}
 		url := nd.search(parts, depth+1, r)
 		if url != constant.NullStr {
@@ -53,19 +82,19 @@ func (n *node) search(parts []string, depth int, r *http.Request) string {
 	return constant.NullStr
 }
 
-func (n *node) matchNode(part string) *node {
+func (n *node) matchNode(part string) trieRouteTreeAbstract {
 	for _, child := range n.children {
-		if child.part == part || child.isVar {
+		if child.getPart() == part || child.getIsVar() {
 			return child
 		}
 	}
 	return nil
 }
 
-func (n *node) matchNodes(part string) []*node {
-	nodes := make([]*node, 0)
+func (n *node) matchNodes(part string) []trieRouteTreeAbstract {
+	nodes := make([]trieRouteTreeAbstract, 0)
 	for _, child := range n.children {
-		if child.part == part || child.isVar {
+		if child.getPart() == part || child.getIsVar() {
 			nodes = append(nodes, child)
 		}
 	}
