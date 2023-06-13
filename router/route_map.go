@@ -71,9 +71,19 @@ func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
 	case string(*HttpMethodGet):
 		parts := strings.Split(url, constant.Slash)
-		realUrl := trieRouteTree.search(parts[1:], 0, r)
+		realUrl := trieRouteTree.search(parts[1:], 0)
 		if realUrl == constant.NullStr {
 			return nil
+		}
+		realUrlParts := strings.Split(realUrl, constant.Slash)
+		for i, part := range realUrlParts[1:] {
+			if part[0] == constant.Colon {
+				if r.URL.RawQuery == constant.NullStr {
+					r.URL.RawQuery = part[1:] + constant.EqualSign + parts[i+1]
+				} else {
+					r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + part[1:] + constant.EqualSign + parts[i+1]
+				}
+			}
 		}
 		return getRouteModelMap[realUrl]
 	case string(*HttpMethodPost):
