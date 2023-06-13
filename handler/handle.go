@@ -51,12 +51,6 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(text))
 		return
 	}
-	if method != string(*(route.GetHttpMethod())) {
-		text := http.StatusText(http.StatusMethodNotAllowed)
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		_, _ = w.Write([]byte(text))
-		return
-	}
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if !gh.intercept(w, r) {
 		w.WriteHeader(http.StatusForbidden)
