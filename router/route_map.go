@@ -4,7 +4,6 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"github.com/fine-snow/finesnow/constant"
 	"go/ast"
 	"go/parser"
@@ -162,19 +161,21 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 			if fd, ok := n.(*ast.FuncDecl); ok && fd.Name.Name == funcName {
 				funcDecl = fd
 				// TODO Parsing interface annotations generates document models
-				doc := fd.Doc
-				if doc != nil && len(doc.List) > 0 {
-					for _, c := range doc.List {
-						fmt.Println(c.Text)
-					}
-				}
+				//doc := fd.Doc
+				//if doc != nil && len(doc.List) > 0 {
+				//	for _, c := range doc.List {
+				//		fmt.Println(c.Text)
+				//	}
+				//}
 				return false
 			}
 			return true
 		})
 		var paramNames []string
 		for _, param := range funcDecl.Type.Params.List {
-			paramNames = append(paramNames, param.Names[0].Name)
+			for _, name := range param.Names {
+				paramNames = append(paramNames, name.Name)
+			}
 		}
 		rm.paramNames = paramNames
 	}
