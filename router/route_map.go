@@ -49,7 +49,7 @@ func put(url string, rm RouteModel, m map[string]RouteModel) {
 
 func dynamicRoute(url string) {
 	parts := strings.Split(url, constant.Slash)
-	trieRouteTree.insert(parts[1:], 0)
+	prefixRouteTree.insert(parts[1:], 0)
 }
 
 func putSelect(url string, rm RouteModel) {
@@ -70,7 +70,7 @@ func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
 	case string(*HttpMethodGet):
 		parts := strings.Split(url, constant.Slash)
-		realUrl := trieRouteTree.search(parts[1:], 0)
+		realUrl := prefixRouteTree.search(parts[1:], 0)
 		if realUrl == constant.NullStr {
 			return nil
 		}
