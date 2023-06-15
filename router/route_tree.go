@@ -1,4 +1,4 @@
-// Trie route tree
+// Prefix route tree
 
 package router
 
@@ -6,26 +6,26 @@ import (
 	"github.com/fine-snow/finesnow/constant"
 )
 
-// TrieRouteTreeAbstract Trie route tree node abstract
-type trieRouteTreeAbstract interface {
+// PrefixRouteTreeAbstract Prefix route tree node abstract
+type prefixRouteTreeAbstract interface {
 	insert([]string, int)
 	search([]string, int) string
-	matchNode(part string) trieRouteTreeAbstract
-	matchNodes(part string) []trieRouteTreeAbstract
+	matchNode(part string) prefixRouteTreeAbstract
+	matchNodes(part string) []prefixRouteTreeAbstract
 	getUrl() string
 	getPart() string
 	getIsVar() bool
 	setIsExist(bool)
 }
 
-// trieRouteTree Global trie route tree
-var trieRouteTree trieRouteTreeAbstract = &node{
+// prefixRouteTree Global prefix route tree
+var prefixRouteTree prefixRouteTreeAbstract = &node{
 	url:      constant.NullStr,
 	part:     constant.NullStr,
-	children: make([]trieRouteTreeAbstract, 0),
+	children: make([]prefixRouteTreeAbstract, 0),
 	isVar:    false}
 
-// node Trie route tree node achieve
+// node prefix route tree node achieve
 // url Node Real Routing Path
 // part Node Partial Routing Path
 // children Node Sub-node Collection
@@ -34,7 +34,7 @@ var trieRouteTree trieRouteTreeAbstract = &node{
 type node struct {
 	url      string
 	part     string
-	children []trieRouteTreeAbstract
+	children []prefixRouteTreeAbstract
 	isVar    bool
 	isExist  bool
 }
@@ -88,7 +88,7 @@ func (n *node) search(parts []string, depth int) string {
 	return constant.NullStr
 }
 
-func (n *node) matchNode(part string) trieRouteTreeAbstract {
+func (n *node) matchNode(part string) prefixRouteTreeAbstract {
 	for _, child := range n.children {
 		if child.getPart() == part {
 			return child
@@ -97,8 +97,8 @@ func (n *node) matchNode(part string) trieRouteTreeAbstract {
 	return nil
 }
 
-func (n *node) matchNodes(part string) []trieRouteTreeAbstract {
-	nodes := make([]trieRouteTreeAbstract, 0)
+func (n *node) matchNodes(part string) []prefixRouteTreeAbstract {
+	nodes := make([]prefixRouteTreeAbstract, 0)
 	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
 			nodes = append(nodes, child)
