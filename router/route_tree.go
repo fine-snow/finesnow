@@ -55,6 +55,7 @@ func (n *node) setIsExist(b bool) {
 	n.isExist = b
 }
 
+// insert Add nodes to the routing tree
 func (n *node) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
@@ -69,6 +70,7 @@ func (n *node) insert(parts []string, depth int) {
 	nd.insert(parts, depth+1)
 }
 
+// search Query the real URL through route tree matching
 func (n *node) search(parts []string, depth int) string {
 	if len(parts) == depth {
 		if n.isExist {
