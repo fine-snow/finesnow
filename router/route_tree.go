@@ -90,6 +90,7 @@ func (n *node) search(parts []string, depth int) string {
 	return constant.NullStr
 }
 
+// matchNode Matches a single node when a node is inserted
 func (n *node) matchNode(part string) prefixRouteTreeAbstract {
 	for _, child := range n.children {
 		if child.getPart() == part {
@@ -99,6 +100,7 @@ func (n *node) matchNode(part string) prefixRouteTreeAbstract {
 	return nil
 }
 
+// matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
 func (n *node) matchNodes(part string) []prefixRouteTreeAbstract {
 	nodes := make([]prefixRouteTreeAbstract, 0)
 	for _, child := range n.children {
