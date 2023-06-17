@@ -2,24 +2,27 @@
 
 package snow
 
-import "github.com/fine-snow/finesnow/router"
+import (
+	"github.com/fine-snow/finesnow/router"
+	"net/http"
+)
 
-// AddGetRoute Add a routing method for GET request
-func AddGetRoute(url string, fun interface{}) {
-	router.AddRoute(url, fun, router.HttpMethodGet)
+// Get Add a routing method for GET request
+func Get(url string, fun interface{}) {
+	router.AddRoute(url, http.MethodGet, fun)
 }
 
-// AddPostRoute Add a routing method for POST request
-func AddPostRoute(url string, fun interface{}) {
-	router.AddRoute(url, fun, router.HttpMethodPost)
+// Post Add a routing method for POST request
+func Post(url string, fun interface{}) {
+	router.AddRoute(url, http.MethodPost, fun)
 }
 
-// AddPutRoute Add a routing method for PUT request
-func AddPutRoute(url string, fun interface{}) {
-	router.AddRoute(url, fun, router.HttpMethodPut)
+// Put Add a routing method for PUT request
+func Put(url string, fun interface{}) {
+	router.AddRoute(url, http.MethodPut, fun)
 }
 
-// AddDeleteRoute Add a routing method for DELETE request
-func AddDeleteRoute(url string, fun interface{}) {
-	router.AddRoute(url, fun, router.HttpMethodDelete)
+// Delete Add a routing method for DELETE request
+func Delete(url string, fun interface{}) {
+	router.AddRoute(url, http.MethodDelete, fun)
 }
