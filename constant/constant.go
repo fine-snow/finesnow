@@ -11,4 +11,7 @@ const (
 	Ampersand = "&"
 	EqualSign = "="
 	Colon     = ':'
+	Zero      = 0
+	One       = 1
+	SixtyFour = 64
 )
