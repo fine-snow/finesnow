@@ -22,7 +22,7 @@ type prefixRouteTreeAbstract interface {
 var prefixRouteTree prefixRouteTreeAbstract = &node{
 	url:      constant.NullStr,
 	part:     constant.NullStr,
-	children: make([]prefixRouteTreeAbstract, 0),
+	children: make([]prefixRouteTreeAbstract, constant.Zero),
 	isVar:    false}
 
 // node prefix route tree node achieve
@@ -60,14 +60,14 @@ func (n *node) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
 	if nd == nil {
-		nd = &node{url: n.url + constant.Slash + part, part: part, isVar: part[0] == constant.Colon}
+		nd = &node{url: n.url + constant.Slash + part, part: part, isVar: part[constant.Zero] == constant.Colon}
 		n.children = append(n.children, nd)
 	}
-	if len(parts) == (depth + 1) {
+	if len(parts) == (depth + constant.One) {
 		nd.setIsExist(true)
 		return
 	}
-	nd.insert(parts, depth+1)
+	nd.insert(parts, depth+constant.One)
 }
 
 // search Query the real URL through route tree matching
@@ -82,7 +82,7 @@ func (n *node) search(parts []string, depth int) string {
 	part := parts[depth]
 	nodes := n.matchNodes(part)
 	for _, nd := range nodes {
-		url := nd.search(parts, depth+1)
+		url := nd.search(parts, depth+constant.One)
 		if url != constant.NullStr {
 			return url
 		}
@@ -102,7 +102,7 @@ func (n *node) matchNode(part string) prefixRouteTreeAbstract {
 
 // matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
 func (n *node) matchNodes(part string) []prefixRouteTreeAbstract {
-	nodes := make([]prefixRouteTreeAbstract, 0)
+	nodes := make([]prefixRouteTreeAbstract, constant.Zero)
 	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
 			nodes = append(nodes, child)
