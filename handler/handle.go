@@ -22,12 +22,6 @@ const (
 	maxMemory       int64 = 1048576
 )
 
-// Handle Http Request Receive Processing Abstract Interface
-// ServeHTTP The method of processing HTTP requests at the bottom of Golang.
-type Handle interface {
-	ServeHTTP(http.ResponseWriter, *http.Request)
-}
-
 // globalHandle HTTP Request Receiving And Processing Abstract Interface Implementation Body
 // intercept Global interceptor properties.
 type globalHandle struct {
