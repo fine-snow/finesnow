@@ -4,14 +4,24 @@ package handler
 
 import (
 	"github.com/fine-snow/finesnow/constant"
-	"github.com/fine-snow/finesnow/router"
 	"net/http"
 	"strings"
 )
 
+const (
+	allow         = "Allow"
+	origin        = "Origin"
+	maxAge        = "Max-Age"
+	maxAgeValue   = "3600"
+	allowMethods  = "Access-Control-Allow-Methods"
+	allowHeaders  = "Access-Control-Allow-Headers"
+	allowOrigin   = "Access-Control-Allow-Origin"
+	authorization = "Authorization"
+)
+
 var allowedOrigin = "*"
-var allowedMethods = []string{"GET", "POST"}
-var allowedHeaders = []string{"Content-Type", "Authorization"}
+var allowedMethods = []string{http.MethodGet, http.MethodPost}
+var allowedHeaders = []string{contentType, authorization}
 
 func SetAllowedOrigin(s string) {
 	allowedOrigin = s
@@ -28,16 +38,16 @@ func SetAllowedHeaders(s []string) {
 // allowCORS
 func allowCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-		if origin != constant.NullStr {
+		ori := r.Header.Get(origin)
+		if ori != constant.NullStr {
 			// Set CORS headers on response
-			w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, constant.Comma))
-			w.Header().Set("Access-Control-Allow-Headers", strings.Join(allowedHeaders, constant.Comma))
-			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+			w.Header().Set(allowMethods, strings.Join(allowedMethods, constant.Comma))
+			w.Header().Set(allowHeaders, strings.Join(allowedHeaders, constant.Comma))
+			w.Header().Set(allowOrigin, allowedOrigin)
 			// Handle preflight request
-			if r.Method == router.HttpMethodOptions {
-				w.Header().Set("Allow", strings.Join(allowedMethods, constant.Comma))
-				w.Header().Set("Max-Age", "3600")
+			if r.Method == http.MethodOptions {
+				w.Header().Set(allow, strings.Join(allowedMethods, constant.Comma))
+				w.Header().Set(maxAge, maxAgeValue)
 				w.WriteHeader(http.StatusNoContent)
 				return
 			}
