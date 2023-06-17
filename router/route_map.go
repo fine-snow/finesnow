@@ -19,7 +19,6 @@ var (
 	errRouteAddNotFunc          = errors.New("the route mapping add function 'fun' parameter value is not a function")
 	errRouteFuncOutAbnormal     = errors.New("the route mapping add function 'fun' parameter value function return value amount is greater than 1")
 	errRouteDuplicateDefinition = errors.New("duplicate definition of routing path")
-	errRouteNoHttpMethod        = errors.New("there is no maintenance routing HTTP request type")
 	errRouteUrlIsNilOrSlash     = errors.New("the route url cannot be null character or '/'")
 
 	fest       = token.NewFileSet()
@@ -35,7 +34,7 @@ func checkFun(t reflect.Type) {
 	if t.Kind() != reflect.Func {
 		panic(errRouteAddNotFunc)
 	}
-	if t.NumOut() > 1 {
+	if t.NumOut() > constant.One {
 		panic(errRouteFuncOutAbnormal)
 	}
 }
@@ -49,47 +48,47 @@ func put(url string, rm RouteModel, m map[string]RouteModel) {
 
 func dynamicRoute(url string) {
 	parts := strings.Split(url, constant.Slash)
-	prefixRouteTree.insert(parts[1:], 0)
+	prefixRouteTree.insert(parts[constant.One:], constant.Zero)
 }
 
-func putSelect(url string, hms *httpMethod, rm RouteModel) {
-	switch hms {
-	case HttpMethodGet:
+func putSelect(url, method string, rm RouteModel) {
+	switch method {
+	case http.MethodGet:
 		put(url, rm, getRouteModelMap)
 		dynamicRoute(url)
-	case HttpMethodPost:
+	case http.MethodPost:
 		put(url, rm, postRouteModelMap)
-	case HttpMethodPut:
+	case http.MethodPut:
 		put(url, rm, putRouteModelMap)
-	case HttpMethodDelete:
+	case http.MethodDelete:
 		put(url, rm, deleteRouteModelMap)
 	}
 }
 
 func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
-	case string(*HttpMethodGet):
+	case http.MethodGet:
 		parts := strings.Split(url, constant.Slash)
-		realUrl := prefixRouteTree.search(parts[1:], 0)
+		realUrl := prefixRouteTree.search(parts[constant.One:], constant.Zero)
 		if realUrl == constant.NullStr {
 			return nil
 		}
 		realUrlParts := strings.Split(realUrl, constant.Slash)
-		for i, part := range realUrlParts[1:] {
-			if part[0] == constant.Colon {
+		for i, part := range realUrlParts[constant.One:] {
+			if part[constant.Zero] == constant.Colon {
 				if r.URL.RawQuery == constant.NullStr {
-					r.URL.RawQuery = part[1:] + constant.EqualSign + parts[i+1]
+					r.URL.RawQuery = part[constant.One:] + constant.EqualSign + parts[i+constant.One]
 				} else {
-					r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + part[1:] + constant.EqualSign + parts[i+1]
+					r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + part[constant.One:] + constant.EqualSign + parts[i+constant.One]
 				}
 			}
 		}
 		return getRouteModelMap[realUrl]
-	case string(*HttpMethodPost):
+	case http.MethodPost:
 		return postRouteModelMap[url]
-	case string(*HttpMethodPut):
+	case http.MethodPut:
 		return putRouteModelMap[url]
-	case string(*HttpMethodDelete):
+	case http.MethodDelete:
 		return deleteRouteModelMap[url]
 	default:
 		return nil
@@ -98,7 +97,7 @@ func Get(url, method string, r *http.Request) RouteModel {
 
 func dealPrefixSlash(url string) string {
 	if strings.HasPrefix(url, constant.Slash) {
-		return dealPrefixSlash(url[1:])
+		return dealPrefixSlash(url[constant.One:])
 	} else {
 		return constant.Slash + url
 	}
@@ -106,13 +105,13 @@ func dealPrefixSlash(url string) string {
 
 func dealSuffixSlash(url string) string {
 	if strings.HasSuffix(url, constant.Slash) {
-		return dealSuffixSlash(url[:len(url)-1])
+		return dealSuffixSlash(url[:len(url)-constant.One])
 	} else {
 		return url
 	}
 }
 
-func AddRoute(url string, fun interface{}, hms *httpMethod) {
+func AddRoute(url, method string, fun interface{}) {
 	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
 	url = dealPrefixSlash(url)
 	url = dealSuffixSlash(url)
@@ -122,14 +121,11 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 	if fun == nil {
 		panic(errRouteFuncIsNil)
 	}
-	if hms == nil {
-		panic(errRouteNoHttpMethod)
-	}
 	t := reflect.TypeOf(fun)
 	checkFun(t)
 	rm := &routeModel{t: t, hct: textPlain}
-	if t.NumOut() > 0 {
-		switch t.Out(0).Kind() {
+	if t.NumOut() > constant.Zero {
+		switch t.Out(constant.Zero).Kind() {
 		case reflect.Bool,
 			reflect.String,
 			reflect.Float32, reflect.Float64,
@@ -143,11 +139,11 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 		}
 	}
 	rm.v = reflect.ValueOf(fun)
-	if t.NumIn() > 0 {
+	if t.NumIn() > constant.Zero {
 		pc := rm.v.Pointer()
 		funPc := runtime.FuncForPC(pc)
 		split := strings.Split(funPc.Name(), constant.Dot)
-		funcName := split[len(split)-1]
+		funcName := split[len(split)-constant.One]
 		fileName, _ := funPc.FileLine(pc)
 		var af *ast.File
 		if f, ok := astFileMap[fileName]; ok {
@@ -179,5 +175,5 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 		}
 		rm.paramNames = paramNames
 	}
-	putSelect(url, hms, rm)
+	putSelect(url, method, rm)
 }
