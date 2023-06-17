@@ -52,8 +52,8 @@ func dynamicRoute(url string) {
 	prefixRouteTree.insert(parts[1:], 0)
 }
 
-func putSelect(url string, rm RouteModel) {
-	switch rm.GetHttpMethod() {
+func putSelect(url string, hms *httpMethod, rm RouteModel) {
+	switch hms {
 	case HttpMethodGet:
 		put(url, rm, getRouteModelMap)
 		dynamicRoute(url)
@@ -127,7 +127,7 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 	}
 	t := reflect.TypeOf(fun)
 	checkFun(t)
-	rm := &routeModel{hm: hms, t: t, hct: textPlain}
+	rm := &routeModel{t: t, hct: textPlain}
 	if t.NumOut() > 0 {
 		switch t.Out(0).Kind() {
 		case reflect.Bool,
@@ -179,5 +179,5 @@ func AddRoute(url string, fun interface{}, hms *httpMethod) {
 		}
 		rm.paramNames = paramNames
 	}
-	putSelect(url, rm)
+	putSelect(url, hms, rm)
 }
