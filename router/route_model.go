@@ -5,7 +5,6 @@ package router
 import "reflect"
 
 type RouteModel interface {
-	GetHttpMethod() *httpMethod
 	GetHttpContentType() *httpContentType
 	GetType() reflect.Type
 	GetValue() reflect.Value
@@ -13,15 +12,10 @@ type RouteModel interface {
 }
 
 type routeModel struct {
-	hm         *httpMethod
 	hct        *httpContentType
 	t          reflect.Type
 	v          reflect.Value
 	paramNames []string
-}
-
-func (rm *routeModel) GetHttpMethod() *httpMethod {
-	return rm.hm
 }
 
 func (rm *routeModel) GetHttpContentType() *httpContentType {
