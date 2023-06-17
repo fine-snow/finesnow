@@ -19,9 +19,11 @@ const (
 	authorization = "Authorization"
 )
 
-var allowedOrigin = "*"
-var allowedMethods = []string{http.MethodGet, http.MethodPost}
-var allowedHeaders = []string{contentType, authorization}
+var (
+	allowedOrigin  = "*"
+	allowedMethods = []string{http.MethodGet, http.MethodPost}
+	allowedHeaders = []string{contentType, authorization}
+)
 
 func SetAllowedOrigin(s string) {
 	allowedOrigin = s
