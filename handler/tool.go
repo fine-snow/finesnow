@@ -4,6 +4,8 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/fine-snow/finesnow/constant"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -11,6 +13,18 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+)
+
+var outRange = errors.New("argument out of range")
+
+const (
+	multipartFileHeader   = "multipart.FileHeader"
+	pMultipartFileHeader  = "*multipart.FileHeader"
+	multipartFileHeaders  = "[]multipart.FileHeader"
+	pMultipartFileHeaders = "[]*multipart.FileHeader"
+
+	response = "http.ResponseWriter"
+	pRequest = "*http.Request"
 )
 
 // convertToByteArray Convert the reflection.Value of a value into a byte array
@@ -28,7 +42,7 @@ func convertToByteArray(value reflect.Value) []byte {
 	case reflect.Pointer, reflect.Interface:
 		return convertToByteArray(value.Elem())
 	default:
-		panic("argument out of range")
+		panic(outRange)
 	}
 }
 
@@ -54,30 +68,30 @@ func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files 
 	var in []reflect.Value
 	for i, k := range paramNames {
 		t := rt.In(i)
-		if strings.Contains(t.String(), "multipart.FileHeader") {
-			if t.String() == "*multipart.FileHeader" {
+		if strings.Contains(t.String(), multipartFileHeader) {
+			if t.String() == pMultipartFileHeader {
 				headers := files[k]
 				if headers != nil {
-					in = append(in, reflect.ValueOf(headers[0]))
+					in = append(in, reflect.ValueOf(headers[constant.Zero]))
 				} else {
 					in = append(in, reflect.ValueOf(&multipart.FileHeader{}))
 				}
 				continue
 			}
-			if t.String() == "[]*multipart.FileHeader" {
+			if t.String() == pMultipartFileHeaders {
 				in = append(in, reflect.ValueOf(files[k]))
 				continue
 			}
-			if t.String() == "multipart.FileHeader" {
+			if t.String() == multipartFileHeader {
 				headers := files[k]
 				if headers != nil {
-					in = append(in, reflect.ValueOf(*(headers[0])))
+					in = append(in, reflect.ValueOf(*(headers[constant.Zero])))
 				} else {
 					in = append(in, reflect.ValueOf(multipart.FileHeader{}))
 				}
 				continue
 			}
-			if t.String() == "[]multipart.FileHeader" {
+			if t.String() == multipartFileHeaders {
 				var fs []multipart.FileHeader
 				for _, f := range files[k] {
 					fs = append(fs, *f)
@@ -86,11 +100,11 @@ func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files 
 				continue
 			}
 		}
-		if t.String() == "http.ResponseWriter" {
+		if t.String() == response {
 			in = append(in, reflect.ValueOf(w))
 			continue
 		}
-		if t.String() == "*http.Request" {
+		if t.String() == pRequest {
 			in = append(in, reflect.ValueOf(r))
 			continue
 		}
@@ -101,22 +115,22 @@ func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files 
 		case reflect.String:
 			in = append(in, reflect.ValueOf(values.Get(k)))
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			v, _ := strconv.ParseInt(values.Get(k), 0, 64)
+			v, _ := strconv.ParseInt(values.Get(k), constant.Zero, constant.SixtyFour)
 			elem := reflect.New(t).Elem()
 			elem.SetInt(v)
 			in = append(in, elem)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			v, _ := strconv.ParseUint(values.Get(k), 0, 64)
+			v, _ := strconv.ParseUint(values.Get(k), constant.Zero, constant.SixtyFour)
 			elem := reflect.New(t).Elem()
 			elem.SetUint(v)
 			in = append(in, elem)
 		case reflect.Float32, reflect.Float64:
-			v, _ := strconv.ParseFloat(values.Get(k), 64)
+			v, _ := strconv.ParseFloat(values.Get(k), constant.SixtyFour)
 			elem := reflect.New(t).Elem()
 			elem.SetFloat(v)
 			in = append(in, elem)
 		default:
-			panic("argument out of range")
+			panic(outRange)
 		}
 	}
 	return in
