@@ -4,6 +4,7 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/fine-snow/finesnow/constant"
 	"github.com/fine-snow/finesnow/router"
 	"io"
 	"net/http"
@@ -16,8 +17,9 @@ import (
 // maxMemory The maximum number of bytes allowed to directly store part of the file content in memory
 // when Golang's underlying processing of multipart/form-data data type requests and carrying file parameters.
 const (
-	contentType       = "Content-Type"
-	maxMemory   int64 = 1048576
+	contentType           = "Content-Type"
+	applicationJson       = "application/json"
+	maxMemory       int64 = 1048576
 )
 
 // Handle Http Request Receive Processing Abstract Interface
@@ -57,37 +59,37 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer catchPanic(w, path, method)
-	if route.GetType().NumIn() == 0 {
+	if route.GetType().NumIn() == constant.Zero {
 		outParam := route.GetValue().Call(nil)
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
 		return
 	}
-	if method == string(*router.HttpMethodGet) {
+	if method == http.MethodGet {
 		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), r.URL.Query(), nil, w, r))
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
 		return
 	}
 	ct := r.Header.Get(contentType)
-	if strings.Contains(ct, "application/json") {
+	if strings.Contains(ct, applicationJson) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
 		}
 		rt := route.GetType()
 		var in []reflect.Value
-		for i := 0; i < rt.NumIn(); i++ {
+		for i := constant.Zero; i < rt.NumIn(); i++ {
 			t := rt.In(i)
-			if t.String() == "*http.Request" {
+			if t.String() == pRequest {
 				in = append(in, reflect.ValueOf(r))
 				continue
 			}
-			if t.String() == "http.ResponseWriter" {
+			if t.String() == response {
 				in = append(in, reflect.ValueOf(w))
 				continue
 			}
@@ -102,7 +104,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
 		return
 	}
 	_ = r.ParseMultipartForm(maxMemory)
@@ -112,7 +114,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
 		return
 	}
 	postForm := r.PostForm
@@ -121,7 +123,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
 		return
 	}
 }
