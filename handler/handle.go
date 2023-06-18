@@ -37,6 +37,7 @@ func NewHandle(intercept Interceptor) http.Handler {
 	return handle
 }
 
+// ServeHTTP Implement the golang low-level handler interface
 func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
