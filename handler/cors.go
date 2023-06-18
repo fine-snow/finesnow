@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Constant declarations
 const (
 	allow         = "Allow"
 	origin        = "Origin"
