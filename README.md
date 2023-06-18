@@ -1,4 +1,4 @@
-# Fine Snow | 细雪
+# Fine Snow
 <div align="center">
     <img alt="Go Badge" src="https://img.shields.io/badge/Go-3e4aac?logo=go&logoColor=fff&style=flat"/>
     <img alt="License Badge" src="https://img.shields.io/github/license/fine-snow/finesnow"/>
