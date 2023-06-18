@@ -19,19 +19,19 @@ type prefixRouteTreeAbstract interface {
 }
 
 // prefixRouteTree Global prefix route tree
-var prefixRouteTree prefixRouteTreeAbstract = &node{
+var prefixRouteTree prefixRouteTreeAbstract = &treeNode{
 	url:      constant.NullStr,
 	part:     constant.NullStr,
 	children: make([]prefixRouteTreeAbstract, constant.Zero),
 	isVar:    false}
 
-// node prefix route tree node achieve
+// treeNode prefix route tree node achieve
 // url Node Real Routing Path
 // part Node Partial Routing Path
 // children Node Sub-node Collection
 // isVar Is the node part path a variable
 // isExist Does this segment of the route really exist
-type node struct {
+type treeNode struct {
 	url      string
 	part     string
 	children []prefixRouteTreeAbstract
@@ -39,28 +39,28 @@ type node struct {
 	isExist  bool
 }
 
-func (n *node) getUrl() string {
+func (n *treeNode) getUrl() string {
 	return n.url
 }
 
-func (n *node) getPart() string {
+func (n *treeNode) getPart() string {
 	return n.part
 }
 
-func (n *node) getIsVar() bool {
+func (n *treeNode) getIsVar() bool {
 	return n.isVar
 }
 
-func (n *node) setIsExist(b bool) {
+func (n *treeNode) setIsExist(b bool) {
 	n.isExist = b
 }
 
 // insert Add nodes to the routing tree
-func (n *node) insert(parts []string, depth int) {
+func (n *treeNode) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
 	if nd == nil {
-		nd = &node{url: n.url + constant.Slash + part, part: part, isVar: part[constant.Zero] == constant.Colon}
+		nd = &treeNode{url: n.url + constant.Slash + part, part: part, isVar: part[constant.Zero] == constant.Colon}
 		n.children = append(n.children, nd)
 	}
 	if len(parts) == (depth + constant.One) {
@@ -71,7 +71,7 @@ func (n *node) insert(parts []string, depth int) {
 }
 
 // search Query the real URL through route tree matching
-func (n *node) search(parts []string, depth int) string {
+func (n *treeNode) search(parts []string, depth int) string {
 	if len(parts) == depth {
 		if n.isExist {
 			return n.url
@@ -91,7 +91,7 @@ func (n *node) search(parts []string, depth int) string {
 }
 
 // matchNode Matches a single node when a node is inserted
-func (n *node) matchNode(part string) prefixRouteTreeAbstract {
+func (n *treeNode) matchNode(part string) prefixRouteTreeAbstract {
 	for _, child := range n.children {
 		if child.getPart() == part {
 			return child
@@ -101,7 +101,7 @@ func (n *node) matchNode(part string) prefixRouteTreeAbstract {
 }
 
 // matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
-func (n *node) matchNodes(part string) []prefixRouteTreeAbstract {
+func (n *treeNode) matchNodes(part string) []prefixRouteTreeAbstract {
 	nodes := make([]prefixRouteTreeAbstract, constant.Zero)
 	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
