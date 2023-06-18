@@ -2,6 +2,7 @@
 
 package constant
 
+// Public constant declarations
 const (
 	Slash     = "/"
 	NullStr   = ""
