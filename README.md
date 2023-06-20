@@ -1,6 +1,6 @@
 # Fine Snow
 <div align="center">
-    <img alt="Go Badge" src="https://img.shields.io/badge/GO-2b7d9c?logo=go&logoColor=fff&style=flat"/>
+    <img alt="Go Badge" src="https://img.shields.io/badge/Go-2b7d9c?logo=go&logoColor=fff&style=flat"/>
     <img alt="License Badge" src="https://img.shields.io/github/license/fine-snow/finesnow"/>
 </div>
 <div align="center">
