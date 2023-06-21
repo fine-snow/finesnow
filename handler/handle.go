@@ -14,6 +14,7 @@ import (
 
 // Partial Constant
 // contentType HTTP request header content type constant string.
+// applicationJson The json property constant of the http request header Content-Type.
 // maxMemory The maximum number of bytes allowed to directly store part of the file content in memory
 // when Golang's underlying processing of multipart/form-data data type requests and carrying file parameters.
 const (
