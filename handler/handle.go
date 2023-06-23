@@ -49,14 +49,18 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(text))
 		return
 	}
+	rt := route.GetType()
+	rv := route.GetValue()
+	numIn := rt.NumIn()
+	names := route.GetParamNames()
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if !gh.intercept(w, r) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	defer catchPanic(w, path, method)
-	if route.GetType().NumIn() == constant.Zero {
-		outParam := route.GetValue().Call(nil)
+	if numIn == constant.Zero {
+		outParam := rv.Call(nil)
 		if outParam == nil {
 			return
 		}
@@ -64,7 +68,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if method == http.MethodGet {
-		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), r.URL.Query(), nil, w, r))
+		outParam := rv.Call(dealInParam(names, rt, r.URL.Query(), nil, w, r))
 		if outParam == nil {
 			return
 		}
@@ -77,16 +81,15 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		rt := route.GetType()
-		var in []reflect.Value
-		for i := constant.Zero; i < rt.NumIn(); i++ {
+		in := make([]reflect.Value, numIn, numIn)
+		for i := constant.Zero; i < numIn; i++ {
 			t := rt.In(i)
 			if t.String() == pRequest {
-				in = append(in, reflect.ValueOf(r))
+				in[i] = reflect.ValueOf(r)
 				continue
 			}
 			if t.String() == response {
-				in = append(in, reflect.ValueOf(w))
+				in[i] = reflect.ValueOf(w)
 				continue
 			}
 			pointer := reflect.New(t)
@@ -94,9 +97,9 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				panic(err)
 			}
-			in = append(in, pointer.Elem())
+			in[i] = pointer.Elem()
 		}
-		outParam := route.GetValue().Call(in)
+		outParam := rv.Call(in)
 		if outParam == nil {
 			return
 		}
@@ -106,7 +109,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseMultipartForm(maxMemory)
 	multipartForm := r.MultipartForm
 	if multipartForm != nil {
-		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), multipartForm.Value, multipartForm.File, w, r))
+		outParam := rv.Call(dealInParam(names, rt, multipartForm.Value, multipartForm.File, w, r))
 		if outParam == nil {
 			return
 		}
@@ -115,7 +118,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	postForm := r.PostForm
 	if postForm != nil {
-		outParam := route.GetValue().Call(dealInParam(route.GetParamNames(), route.GetType(), postForm, nil, w, r))
+		outParam := rv.Call(dealInParam(names, rt, postForm, nil, w, r))
 		if outParam == nil {
 			return
 		}
