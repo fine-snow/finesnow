@@ -111,7 +111,7 @@ func dealSuffixSlash(url string) string {
 	}
 }
 
-func AddRoute(url, method string, fun interface{}) {
+func AddRoute(url, method string, fun any) {
 	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
 	url = dealPrefixSlash(url)
 	url = dealSuffixSlash(url)
