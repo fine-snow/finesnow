@@ -8,21 +8,21 @@ import (
 )
 
 // Get Add a routing method for GET request
-func Get(url string, fun interface{}) {
+func Get(url string, fun any) {
 	router.AddRoute(url, http.MethodGet, fun)
 }
 
 // Post Add a routing method for POST request
-func Post(url string, fun interface{}) {
+func Post(url string, fun any) {
 	router.AddRoute(url, http.MethodPost, fun)
 }
 
 // Put Add a routing method for PUT request
-func Put(url string, fun interface{}) {
+func Put(url string, fun any) {
 	router.AddRoute(url, http.MethodPut, fun)
 }
 
 // Delete Add a routing method for DELETE request
-func Delete(url string, fun interface{}) {
+func Delete(url string, fun any) {
 	router.AddRoute(url, http.MethodDelete, fun)
 }
