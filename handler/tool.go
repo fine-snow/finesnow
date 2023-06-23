@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/fine-snow/finesnow/constant"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -50,6 +51,7 @@ func convertToByteArray(value reflect.Value) []byte {
 func catchPanic(w http.ResponseWriter, path, method string) {
 	err := recover()
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
@@ -65,70 +67,73 @@ type Files map[string][]*multipart.FileHeader
 
 // dealInParam Http request input processing method
 func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files Files, w http.ResponseWriter, r *http.Request) []reflect.Value {
-	var in []reflect.Value
+	l := len(paramNames)
+	in := make([]reflect.Value, l, l)
 	for i, k := range paramNames {
 		t := rt.In(i)
 		if strings.Contains(t.String(), multipartFileHeader) {
 			if t.String() == pMultipartFileHeader {
 				headers := files[k]
 				if headers != nil {
-					in = append(in, reflect.ValueOf(headers[constant.Zero]))
+					in[i] = reflect.ValueOf(headers[constant.Zero])
 				} else {
-					in = append(in, reflect.ValueOf(&multipart.FileHeader{}))
+					var header *multipart.FileHeader
+					in[i] = reflect.ValueOf(header)
 				}
 				continue
 			}
 			if t.String() == pMultipartFileHeaders {
-				in = append(in, reflect.ValueOf(files[k]))
+				in[i] = reflect.ValueOf(files[k])
 				continue
 			}
 			if t.String() == multipartFileHeader {
 				headers := files[k]
 				if headers != nil {
-					in = append(in, reflect.ValueOf(*(headers[constant.Zero])))
+					in[i] = reflect.ValueOf(*(headers[constant.Zero]))
 				} else {
-					in = append(in, reflect.ValueOf(multipart.FileHeader{}))
+					in[i] = reflect.ValueOf(multipart.FileHeader{})
 				}
 				continue
 			}
 			if t.String() == multipartFileHeaders {
 				var fs []multipart.FileHeader
-				for _, f := range files[k] {
+				headers := files[k]
+				for _, f := range headers {
 					fs = append(fs, *f)
 				}
-				in = append(in, reflect.ValueOf(fs))
+				in[i] = reflect.ValueOf(fs)
 				continue
 			}
 		}
 		if t.String() == response {
-			in = append(in, reflect.ValueOf(w))
+			in[i] = reflect.ValueOf(w)
 			continue
 		}
 		if t.String() == pRequest {
-			in = append(in, reflect.ValueOf(r))
+			in[i] = reflect.ValueOf(r)
 			continue
 		}
 		switch t.Kind() {
 		case reflect.Bool:
 			v, _ := strconv.ParseBool(values.Get(k))
-			in = append(in, reflect.ValueOf(v))
+			in[i] = reflect.ValueOf(v)
 		case reflect.String:
-			in = append(in, reflect.ValueOf(values.Get(k)))
+			in[i] = reflect.ValueOf(values.Get(k))
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			v, _ := strconv.ParseInt(values.Get(k), constant.Zero, constant.SixtyFour)
 			elem := reflect.New(t).Elem()
 			elem.SetInt(v)
-			in = append(in, elem)
+			in[i] = elem
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			v, _ := strconv.ParseUint(values.Get(k), constant.Zero, constant.SixtyFour)
 			elem := reflect.New(t).Elem()
 			elem.SetUint(v)
-			in = append(in, elem)
+			in[i] = elem
 		case reflect.Float32, reflect.Float64:
 			v, _ := strconv.ParseFloat(values.Get(k), constant.SixtyFour)
 			elem := reflect.New(t).Elem()
 			elem.SetFloat(v)
-			in = append(in, elem)
+			in[i] = elem
 		default:
 			panic(outRange)
 		}
