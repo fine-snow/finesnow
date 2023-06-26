@@ -6,12 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/fine-snow/finesnow/constant"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -44,22 +42,6 @@ func convertToByteArray(value reflect.Value) []byte {
 		return convertToByteArray(value.Elem())
 	default:
 		panic(outRange)
-	}
-}
-
-// catchPanic Capture exceptions thrown during http request processing
-func catchPanic(w http.ResponseWriter, path, method string) {
-	err := recover()
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		switch err.(type) {
-		case runtime.Error:
-			_, _ = w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
-		default:
-			errBytes := convertToByteArray(reflect.ValueOf(err))
-			_, _ = w.Write(errBytes)
-		}
 	}
 }
 
