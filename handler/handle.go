@@ -30,10 +30,6 @@ type globalHandle struct {
 }
 
 func NewHandle(intercept Interceptor) http.Handler {
-	// If the interceptor parameter passed in by the startup method is empty, supplement the default interceptor method
-	if intercept == nil {
-		intercept = defaultInterceptor
-	}
 	handle := allowCORS(&globalHandle{intercept})
 	return handle
 }
@@ -54,7 +50,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	numIn := rt.NumIn()
 	names := route.GetParamNames()
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
-	if !gh.intercept(w, r) {
+	if gh.intercept != nil && !gh.intercept(w, r) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
