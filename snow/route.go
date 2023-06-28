@@ -28,6 +28,7 @@ func Delete(url string, fun any) {
 	router.AddRoute(constant.NullStr, url, http.MethodDelete, fun)
 }
 
+// Group Create a route group
 func Group(url string) router.RouteGroup {
 	return router.NewGroup(url)
 }
