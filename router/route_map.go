@@ -111,7 +111,7 @@ func dealSuffixSlash(url string) string {
 	}
 }
 
-func AddRoute(url, method string, fun any) {
+func AddRoute(group, url, method string, fun any) {
 	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
 	url = dealPrefixSlash(url)
 	url = dealSuffixSlash(url)
@@ -175,5 +175,5 @@ func AddRoute(url, method string, fun any) {
 		}
 		rm.paramNames = paramNames
 	}
-	putSelect(url, method, rm)
+	putSelect(group+url, method, rm)
 }
