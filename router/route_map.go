@@ -1,4 +1,4 @@
-// Routing model collection
+// Route model collection
 
 package router
 
