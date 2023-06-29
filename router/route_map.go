@@ -48,11 +48,13 @@ func put(url string, rm RouteModel, m map[string]RouteModel) {
 	m[url] = rm
 }
 
+// dynamicRoute Dynamic route handling methods
 func dynamicRoute(url string) {
 	parts := strings.Split(url, constant.Slash)
 	prefixRouteTree.insert(parts[constant.One:], constant.Zero)
 }
 
+// putSelect Select the corresponding routing model collection to add it
 func putSelect(url, method string, rm RouteModel) {
 	switch method {
 	case http.MethodGet:
@@ -67,6 +69,7 @@ func putSelect(url, method string, rm RouteModel) {
 	}
 }
 
+// Get Based on the URL, method finds the corresponding routing model
 func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
 	case http.MethodGet:
