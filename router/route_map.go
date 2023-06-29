@@ -40,6 +40,7 @@ func checkFun(t reflect.Type) {
 	}
 }
 
+// put Add the routing model to the collection
 func put(url string, rm RouteModel, m map[string]RouteModel) {
 	if _, ok := m[url]; ok {
 		panic(errRouteDuplicateDefinition)
