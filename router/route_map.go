@@ -30,6 +30,7 @@ var (
 	deleteRouteModelMap = make(map[string]RouteModel)
 )
 
+// checkFun Verify the validity of the fun parameter
 func checkFun(t reflect.Type) {
 	if t.Kind() != reflect.Func {
 		panic(errRouteAddNotFunc)
@@ -39,6 +40,7 @@ func checkFun(t reflect.Type) {
 	}
 }
 
+// put Add the routing model to the collection
 func put(url string, rm RouteModel, m map[string]RouteModel) {
 	if _, ok := m[url]; ok {
 		panic(errRouteDuplicateDefinition)
@@ -46,11 +48,13 @@ func put(url string, rm RouteModel, m map[string]RouteModel) {
 	m[url] = rm
 }
 
+// dynamicRoute Dynamic route handling methods
 func dynamicRoute(url string) {
 	parts := strings.Split(url, constant.Slash)
 	prefixRouteTree.insert(parts[constant.One:], constant.Zero)
 }
 
+// putSelect Select the corresponding routing model collection to add it
 func putSelect(url, method string, rm RouteModel) {
 	switch method {
 	case http.MethodGet:
@@ -65,6 +69,7 @@ func putSelect(url, method string, rm RouteModel) {
 	}
 }
 
+// Get Based on the URL, method finds the corresponding routing model
 func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
 	case http.MethodGet:
