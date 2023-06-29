@@ -30,6 +30,7 @@ var (
 	deleteRouteModelMap = make(map[string]RouteModel)
 )
 
+// checkFun Verify the validity of the fun parameter
 func checkFun(t reflect.Type) {
 	if t.Kind() != reflect.Func {
 		panic(errRouteAddNotFunc)
