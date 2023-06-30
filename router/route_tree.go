@@ -23,7 +23,8 @@ var prefixRouteTree prefixRouteTreeAbstract = &treeNode{
 	url:      constant.NullStr,
 	part:     constant.NullStr,
 	children: make([]prefixRouteTreeAbstract, constant.Zero),
-	isVar:    false}
+	isVar:    false,
+}
 
 // treeNode prefix route tree node achieve
 // url Node Real Routing Path
