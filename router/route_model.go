@@ -4,6 +4,7 @@ package router
 
 import "reflect"
 
+// RouteModel Route features abstract interface model
 type RouteModel interface {
 	GetHttpContentType() *httpContentType
 	GetType() reflect.Type
@@ -11,6 +12,7 @@ type RouteModel interface {
 	GetParamNames() []string
 }
 
+// routeModel The route model implements the structure
 type routeModel struct {
 	hct        *httpContentType
 	t          reflect.Type
