@@ -4,6 +4,7 @@ package snow
 
 import "time"
 
+// Timeout variable
 var (
 	readTimeout       = 3 * time.Second
 	readHeaderTimeout = 3 * time.Second

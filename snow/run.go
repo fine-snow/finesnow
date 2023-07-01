@@ -3,6 +3,7 @@
 package snow
 
 import (
+	"github.com/fine-snow/finesnow/constant"
 	"github.com/fine-snow/finesnow/handler"
 	"net/http"
 )
@@ -21,7 +22,12 @@ func Run(addr string, intercept handler.Interceptor) {
 		IdleTimeout:       idleTimeout,
 	}
 	outputFrameworkInfo()
-	err := server.ListenAndServe()
+	var err error
+	if certFile != constant.NullStr && keyFile != constant.NullStr {
+		err = server.ListenAndServeTLS(certFile, keyFile)
+	} else {
+		err = server.ListenAndServe()
+	}
 	if err != nil {
 		panic(err)
 	}
