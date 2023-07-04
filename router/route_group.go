@@ -3,17 +3,16 @@
 package router
 
 import (
-	"github.com/fine-snow/finesnow/constant"
 	"net/http"
-	"strings"
 )
 
 // RouteGroup Route group abstract interface
 type RouteGroup interface {
-	Get(url string, fun any) RouteGroup
-	Post(url string, fun any) RouteGroup
-	Put(url string, fun any) RouteGroup
-	Delete(url string, fun any) RouteGroup
+	Get(string, any) RouteGroup
+	Post(string, any) RouteGroup
+	Put(string, any) RouteGroup
+	Delete(string, any) RouteGroup
+	Group(string) RouteGroup
 }
 
 // routeGroup Routing group functional structure
@@ -23,12 +22,7 @@ type routeGroup struct {
 
 // NewGroup Create a routing group struct object
 func NewGroup(url string) RouteGroup {
-	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
-	url = dealPrefixSlash(url)
-	url = dealSuffixSlash(url)
-	if url == constant.NullStr || url == constant.Slash {
-		panic(errRouteUrlIsNilOrSlash)
-	}
+	url = checkUrl(url)
 	return &routeGroup{url: url}
 }
 
@@ -54,4 +48,10 @@ func (rg *routeGroup) Put(url string, fun any) RouteGroup {
 func (rg *routeGroup) Delete(url string, fun any) RouteGroup {
 	AddRoute(rg.url, url, http.MethodDelete, fun)
 	return rg
+}
+
+// Group Route group nesting
+func (rg *routeGroup) Group(url string) RouteGroup {
+	url = checkUrl(url)
+	return &routeGroup{url: rg.url + url}
 }

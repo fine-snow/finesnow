@@ -116,13 +116,18 @@ func dealSuffixSlash(url string) string {
 	}
 }
 
-func AddRoute(group, url, method string, fun any) {
+func checkUrl(url string) string {
 	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
 	url = dealPrefixSlash(url)
 	url = dealSuffixSlash(url)
 	if url == constant.NullStr || url == constant.Slash {
 		panic(errRouteUrlIsNilOrSlash)
 	}
+	return url
+}
+
+func AddRoute(group, url, method string, fun any) {
+	url = checkUrl(url)
 	if fun == nil {
 		panic(errRouteFuncIsNil)
 	}
