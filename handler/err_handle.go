@@ -13,7 +13,7 @@ import (
 type ErrHandleFunc func(err any) any
 
 // globalErrHandleFunc Global Exception Handling Function Variables
-var globalErrHandleFunc ErrHandleFunc = nil
+var globalErrHandleFunc ErrHandleFunc
 
 // SetGlobalErrHandleFunc Set global exception handling functions
 func SetGlobalErrHandleFunc(fun ErrHandleFunc) {
