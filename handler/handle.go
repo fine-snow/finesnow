@@ -54,7 +54,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	defer catchPanic(w, path, method)
+	defer catchHttpPanic(w, path, method)
 	if numIn == constant.Zero {
 		outParam := rv.Call(nil)
 		if outParam == nil {
