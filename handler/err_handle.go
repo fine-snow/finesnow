@@ -3,7 +3,7 @@
 package handler
 
 import (
-	"log"
+	"github.com/fine-snow/finesnow/logs"
 	"net/http"
 	"reflect"
 	"runtime"
@@ -24,7 +24,7 @@ func SetGlobalErrHandleFunc(fun ErrHandleFunc) {
 func catchPanic(w http.ResponseWriter, path, method string) {
 	err := recover()
 	if err != nil {
-		log.Println(err)
+		logs.ERROR(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
@@ -36,5 +36,7 @@ func catchPanic(w http.ResponseWriter, path, method string) {
 			errBytes := convertToByteArray(reflect.ValueOf(err))
 			_, _ = w.Write(errBytes)
 		}
+		return
 	}
+	logs.INFOF("%s, %s success", path, method)
 }
