@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"runtime/debug"
 )
 
 // ErrHandleFunc Abstract Method
@@ -20,11 +21,12 @@ func SetGlobalErrHandleFunc(fun ErrHandleFunc) {
 	globalErrHandleFunc = fun
 }
 
-// catchPanic Capture exceptions thrown during http request processing
-func catchPanic(w http.ResponseWriter, path, method string) {
+// catchHttpPanic Capture exceptions thrown during http request processing
+func catchHttpPanic(w http.ResponseWriter, path, method string) {
 	err := recover()
 	if err != nil {
 		logs.ERROR(err)
+		logs.ERROR(string(debug.Stack()))
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
@@ -38,5 +40,15 @@ func catchPanic(w http.ResponseWriter, path, method string) {
 		}
 		return
 	}
-	logs.INFOF("%s, %s success", path, method)
+	logs.INFOF("%s %s \u001B[32mSUCCESS\u001B[0m", method, path)
+}
+
+// CatchRunPanic Capture exceptions generated during framework startup process
+func CatchRunPanic() {
+	err := recover()
+	if err != nil {
+		logs.ERROR(err)
+		logs.ERROR(string(debug.Stack()))
+		return
+	}
 }

@@ -11,9 +11,9 @@ type LogFunc func(...any)
 type LogfFunc func(string, ...any)
 
 var (
-	infoLog  = log.New(os.Stdout, "\033[34m[INFO]\033[0m ", log.LstdFlags|log.Lshortfile)
-	warnLog  = log.New(os.Stdout, "\033[33m[WARN]\033[0m ", log.LstdFlags|log.Lshortfile)
-	errorLog = log.New(os.Stdout, "\033[31m[ERROR]\033[0m ", log.LstdFlags|log.Lshortfile)
+	infoLog  = log.New(os.Stdout, "\033[34mINFO\033[0m ", log.LstdFlags|log.Lmsgprefix)
+	warnLog  = log.New(os.Stdout, "\033[33mWARN\033[0m ", log.LstdFlags|log.Lmsgprefix)
+	errorLog = log.New(os.Stdout, "\033[31mERROR\033[0m ", log.LstdFlags|log.Lmsgprefix)
 
 	INFO   LogFunc
 	INFOF  LogfFunc
@@ -23,7 +23,7 @@ var (
 	ERRORF LogfFunc
 )
 
-func InitLogFunc() {
+func init() {
 	if INFO == nil {
 		INFO = infoLog.Println
 	}
