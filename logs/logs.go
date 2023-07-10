@@ -3,16 +3,19 @@
 package logs
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
 )
 
 type LogFunc func(...any)
+
 type LogfFunc func(string, ...any)
 
 var (
-	infoLog  = log.New(os.Stdout, "\033[34mINFO\033[0m ", log.LstdFlags|log.Lmsgprefix)
-	warnLog  = log.New(os.Stdout, "\033[33mWARN\033[0m ", log.LstdFlags|log.Lmsgprefix)
+	infoLog  = log.New(os.Stdout, "\033[34mINFO\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
+	warnLog  = log.New(os.Stdout, "\033[33mWARN\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	errorLog = log.New(os.Stdout, "\033[31mERROR\033[0m ", log.LstdFlags|log.Lmsgprefix)
 
 	INFO   LogFunc
@@ -22,6 +25,20 @@ var (
 	ERROR  LogFunc
 	ERRORF LogfFunc
 )
+
+func newLogFunc(l *log.Logger) LogFunc {
+	return func(v ...any) {
+		v = append(v, string(debug.Stack()))
+		_ = l.Output(3, fmt.Sprintln(v...))
+	}
+}
+
+func newLogfFunc(l *log.Logger) LogfFunc {
+	return func(format string, v ...any) {
+		v = append(v, string(debug.Stack()))
+		_ = l.Output(3, fmt.Sprintln(v...))
+	}
+}
 
 func init() {
 	if INFO == nil {
@@ -37,9 +54,9 @@ func init() {
 		WARNF = warnLog.Printf
 	}
 	if ERROR == nil {
-		ERROR = errorLog.Println
+		ERROR = newLogFunc(errorLog)
 	}
 	if ERRORF == nil {
-		ERRORF = errorLog.Printf
+		ERRORF = newLogfFunc(errorLog)
 	}
 }

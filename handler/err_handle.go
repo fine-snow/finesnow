@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
-	"runtime/debug"
 )
 
 // ErrHandleFunc Abstract Method
@@ -26,7 +25,6 @@ func catchHttpPanic(w http.ResponseWriter, path, method string) {
 	err := recover()
 	if err != nil {
 		logs.ERROR(err)
-		logs.ERROR(string(debug.Stack()))
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
@@ -48,7 +46,6 @@ func CatchRunPanic() {
 	err := recover()
 	if err != nil {
 		logs.ERROR(err)
-		logs.ERROR(string(debug.Stack()))
 		return
 	}
 }
