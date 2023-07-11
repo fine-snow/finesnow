@@ -5,10 +5,12 @@ package handler
 import (
 	"encoding/json"
 	"github.com/fine-snow/finesnow/constant"
+	"github.com/fine-snow/finesnow/logs"
 	"github.com/fine-snow/finesnow/router"
 	"io"
 	"net/http"
 	"reflect"
+	"runtime"
 	"strings"
 )
 
@@ -54,7 +56,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	defer catchHttpPanic(w, path, method)
+	defer catchHttpPanic(w)
 	if numIn == constant.Zero {
 		outParam := rv.Call(nil)
 		if outParam == nil {
@@ -119,6 +121,46 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
+		return
+	}
+}
+
+// ErrHandleFunc Abstract Method
+type ErrHandleFunc func(err any) any
+
+// globalErrHandleFunc Global Exception Handling Function Variables
+var globalErrHandleFunc ErrHandleFunc
+
+// SetGlobalErrHandleFunc Set global exception handling functions
+func SetGlobalErrHandleFunc(fun ErrHandleFunc) {
+	globalErrHandleFunc = fun
+}
+
+// catchHttpPanic Capture exceptions thrown during http request processing
+func catchHttpPanic(w http.ResponseWriter) {
+	err := recover()
+	if err != nil {
+		logs.ERROR(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		switch err.(type) {
+		case runtime.Error:
+			_, _ = w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		default:
+			if globalErrHandleFunc != nil {
+				err = globalErrHandleFunc(err)
+			}
+			errBytes := convertToByteArray(reflect.ValueOf(err))
+			_, _ = w.Write(errBytes)
+		}
+		return
+	}
+}
+
+// CatchRunPanic Capture exceptions generated during framework startup process
+func CatchRunPanic() {
+	err := recover()
+	if err != nil {
+		logs.ERROR(err)
 		return
 	}
 }
