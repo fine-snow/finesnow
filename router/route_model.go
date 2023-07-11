@@ -35,3 +35,11 @@ func (rm *routeModel) GetValue() reflect.Value {
 func (rm *routeModel) GetParamNames() []string {
 	return rm.paramNames
 }
+
+// traRouteModel Transition Route Model Structure
+type traRouteModel struct {
+	group  string
+	url    string
+	method string
+	fun    any
+}
