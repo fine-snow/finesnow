@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ver    = "v0.0.1 beta"
+	ver    = "	\u001B[32m:: Fine Snow ::\u001B[0m		(v0.0.1 beta)"
 	oldStr = "snow/frame.go"
 	newStr = "banner.txt"
 )
@@ -28,7 +28,7 @@ func outputFrameworkInfo() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
+		fmt.Println("\u001B[36m" + line + "\u001B")
 	}
 	if err = scanner.Err(); err != nil {
 		panic(err)

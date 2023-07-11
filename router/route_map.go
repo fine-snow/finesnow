@@ -28,6 +28,8 @@ var (
 	postRouteModelMap   = make(map[string]RouteModel)
 	putRouteModelMap    = make(map[string]RouteModel)
 	deleteRouteModelMap = make(map[string]RouteModel)
+
+	allRouteSlice = make([]*traRouteModel, constant.Zero)
 )
 
 // checkFun Verify the validity of the fun parameter
@@ -126,7 +128,8 @@ func checkUrl(url string) string {
 	return url
 }
 
-func AddRoute(group, url, method string, fun any) {
+// dealRoute Processing Transition Routes to Generate Real Route Models
+func dealRoute(group, url, method string, fun any) {
 	url = checkUrl(url)
 	if fun == nil {
 		panic(errRouteFuncIsNil)
@@ -186,4 +189,16 @@ func AddRoute(group, url, method string, fun any) {
 		rm.paramNames = paramNames
 	}
 	putSelect(group+url, method, rm)
+}
+
+// AddRoute Add Transition Route
+func AddRoute(group, url, method string, fun any) {
+	allRouteSlice = append(allRouteSlice, &traRouteModel{group: group, url: url, method: method, fun: fun})
+}
+
+// DealRoute All transition routing methods for handling external exposure
+func DealRoute() {
+	for _, v := range allRouteSlice {
+		dealRoute(v.group, v.url, v.method, v.fun)
+	}
 }
