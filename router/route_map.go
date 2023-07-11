@@ -201,4 +201,6 @@ func DealRoute() {
 	for _, v := range allRouteSlice {
 		dealRoute(v.group, v.url, v.method, v.fun)
 	}
+	// Empty and wait for GC to reclaim memory
+	allRouteSlice = nil
 }
