@@ -4,7 +4,6 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/fine-snow/finesnow/constant"
 	"github.com/fine-snow/finesnow/logs"
 	"github.com/fine-snow/finesnow/router"
 	"io"
@@ -57,12 +56,12 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer catchHttpPanic(w)
-	if numIn == constant.Zero {
+	if numIn == 0 {
 		outParam := rv.Call(nil)
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	if method == http.MethodGet {
@@ -70,7 +69,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	ct := r.Header.Get(contentType)
@@ -80,7 +79,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		in := make([]reflect.Value, numIn, numIn)
-		for i := constant.Zero; i < numIn; i++ {
+		for i := 0; i < numIn; i++ {
 			t := rt.In(i)
 			if t.String() == pRequest {
 				in[i] = reflect.ValueOf(r)
@@ -101,7 +100,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	_ = r.ParseMultipartForm(maxMemory)
@@ -111,7 +110,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	postForm := r.PostForm
@@ -120,7 +119,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[constant.Zero]))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 }

@@ -2,16 +2,12 @@
 
 package router
 
-import (
-	"github.com/fine-snow/finesnow/constant"
-)
-
-// PrefixRouteTreeAbstract Prefix route tree node abstract
-type prefixRouteTreeAbstract interface {
+// PrefixRouteTree Prefix route tree node abstract
+type PrefixRouteTree interface {
 	insert([]string, int)
 	search([]string, int) string
-	matchNode(part string) prefixRouteTreeAbstract
-	matchNodes(part string) []prefixRouteTreeAbstract
+	matchNode(part string) PrefixRouteTree
+	matchNodes(part string) []PrefixRouteTree
 	getUrl() string
 	getPart() string
 	getIsVar() bool
@@ -19,10 +15,10 @@ type prefixRouteTreeAbstract interface {
 }
 
 // prefixRouteTree Global prefix route tree
-var prefixRouteTree prefixRouteTreeAbstract = &treeNode{
-	url:      constant.NullStr,
-	part:     constant.NullStr,
-	children: make([]prefixRouteTreeAbstract, constant.Zero),
+var prefixRouteTree PrefixRouteTree = &treeNode{
+	url:      "",
+	part:     "",
+	children: make([]PrefixRouteTree, 0),
 	isVar:    false,
 }
 
@@ -35,7 +31,7 @@ var prefixRouteTree prefixRouteTreeAbstract = &treeNode{
 type treeNode struct {
 	url      string
 	part     string
-	children []prefixRouteTreeAbstract
+	children []PrefixRouteTree
 	isVar    bool
 	isExist  bool
 }
@@ -61,14 +57,14 @@ func (n *treeNode) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
 	if nd == nil {
-		nd = &treeNode{url: n.url + constant.Slash + part, part: part, isVar: part[constant.Zero] == constant.Colon}
+		nd = &treeNode{url: n.url + "/" + part, part: part, isVar: part[0] == ':'}
 		n.children = append(n.children, nd)
 	}
-	if len(parts) == (depth + constant.One) {
+	if len(parts) == (depth + 1) {
 		nd.setIsExist(true)
 		return
 	}
-	nd.insert(parts, depth+constant.One)
+	nd.insert(parts, depth+1)
 }
 
 // search Query the real URL through route tree matching
@@ -77,22 +73,22 @@ func (n *treeNode) search(parts []string, depth int) string {
 		if n.isExist {
 			return n.url
 		} else {
-			return constant.NullStr
+			return ""
 		}
 	}
 	part := parts[depth]
 	nodes := n.matchNodes(part)
 	for _, nd := range nodes {
-		url := nd.search(parts, depth+constant.One)
-		if url != constant.NullStr {
+		url := nd.search(parts, depth+1)
+		if url != "" {
 			return url
 		}
 	}
-	return constant.NullStr
+	return ""
 }
 
 // matchNode Matches a single node when a node is inserted
-func (n *treeNode) matchNode(part string) prefixRouteTreeAbstract {
+func (n *treeNode) matchNode(part string) PrefixRouteTree {
 	for _, child := range n.children {
 		if child.getPart() == part {
 			return child
@@ -102,8 +98,8 @@ func (n *treeNode) matchNode(part string) prefixRouteTreeAbstract {
 }
 
 // matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
-func (n *treeNode) matchNodes(part string) []prefixRouteTreeAbstract {
-	nodes := make([]prefixRouteTreeAbstract, constant.Zero)
+func (n *treeNode) matchNodes(part string) []PrefixRouteTree {
+	nodes := make([]PrefixRouteTree, 0)
 	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
 			nodes = append(nodes, child)
