@@ -3,7 +3,6 @@
 package snow
 
 import (
-	"github.com/fine-snow/finesnow/constant"
 	"github.com/fine-snow/finesnow/handler"
 	"github.com/fine-snow/finesnow/logs"
 	"github.com/fine-snow/finesnow/router"
@@ -34,22 +33,22 @@ func SetLogOutput(l logs.LogOutput) {
 
 // Get Add a routing method for GET request
 func Get(url string, fun any) {
-	router.AddRoute(constant.NullStr, url, http.MethodGet, fun)
+	router.AddRoute("", url, http.MethodGet, fun)
 }
 
 // Post Add a routing method for POST request
 func Post(url string, fun any) {
-	router.AddRoute(constant.NullStr, url, http.MethodPost, fun)
+	router.AddRoute("", url, http.MethodPost, fun)
 }
 
 // Put Add a routing method for PUT request
 func Put(url string, fun any) {
-	router.AddRoute(constant.NullStr, url, http.MethodPut, fun)
+	router.AddRoute("", url, http.MethodPut, fun)
 }
 
 // Delete Add a routing method for DELETE request
 func Delete(url string, fun any) {
-	router.AddRoute(constant.NullStr, url, http.MethodDelete, fun)
+	router.AddRoute("", url, http.MethodDelete, fun)
 }
 
 // Group Create a route group
@@ -181,7 +180,7 @@ func Run(addr string, intercept handler.Interceptor) {
 	var err error
 
 	// Attempt to listen to the specified address and port
-	ln, err := net.Listen(constant.TCP, addr)
+	ln, err := net.Listen("tcp", addr)
 
 	// Abnormal information judgment
 	if err != nil {
@@ -211,7 +210,7 @@ func Run(addr string, intercept handler.Interceptor) {
 	}(ln)
 
 	// Startup method judgment
-	if certFile != constant.NullStr && keyFile != constant.NullStr {
+	if certFile != "" && keyFile != "" {
 		err = server.ServeTLS(ln, certFile, keyFile)
 	} else {
 		err = server.Serve(ln)
