@@ -3,7 +3,6 @@
 package logs
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime/debug"
@@ -26,37 +25,63 @@ var (
 	ERRORF LogfFunc
 )
 
+type LogOutput interface {
+	INFO(...any)
+	INFOF(string, ...any)
+	WARN(...any)
+	WARNF(string, ...any)
+	ERROR(...any)
+	ERRORF(string, ...any)
+}
+
 func newLogFunc(l *log.Logger) LogFunc {
 	return func(v ...any) {
 		v = append(v, string(debug.Stack()))
-		_ = l.Output(3, fmt.Sprintln(v...))
+		l.Println(v)
 	}
 }
 
 func newLogfFunc(l *log.Logger) LogfFunc {
 	return func(format string, v ...any) {
 		v = append(v, string(debug.Stack()))
-		_ = l.Output(3, fmt.Sprintln(v...))
+		l.Printf(format, v)
+	}
+}
+
+func newErrorLogFunc(l LogOutput) LogFunc {
+	return func(v ...any) {
+		v = append(v, string(debug.Stack()))
+		l.ERROR(v)
+	}
+}
+
+func newErrorLogfFunc(l LogOutput) LogfFunc {
+	return func(format string, v ...any) {
+		v = append(v, string(debug.Stack()))
+		l.ERRORF(format, v)
 	}
 }
 
 func init() {
-	if INFO == nil {
-		INFO = infoLog.Println
-	}
-	if INFOF == nil {
-		INFOF = infoLog.Printf
-	}
-	if WARN == nil {
-		WARN = warnLog.Println
-	}
-	if WARNF == nil {
-		WARNF = warnLog.Printf
-	}
-	if ERROR == nil {
-		ERROR = newLogFunc(errorLog)
-	}
-	if ERRORF == nil {
-		ERRORF = newLogfFunc(errorLog)
-	}
+	INFO = infoLog.Println
+	INFOF = infoLog.Printf
+	WARN = warnLog.Println
+	WARNF = warnLog.Printf
+	ERRORF = newLogfFunc(errorLog)
+	ERROR = newLogFunc(errorLog)
+}
+
+func SetLogOutput(l LogOutput) {
+	// Method attribute assignment
+	INFO = l.INFO
+	INFOF = l.INFOF
+	WARN = l.WARN
+	WARNF = l.WARNF
+	ERROR = newErrorLogFunc(l)
+	ERRORF = newErrorLogfFunc(l)
+
+	// Empty to free memory
+	infoLog = nil
+	warnLog = nil
+	errorLog = nil
 }
