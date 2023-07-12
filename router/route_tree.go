@@ -6,12 +6,12 @@ import (
 	"github.com/fine-snow/finesnow/constant"
 )
 
-// PrefixRouteTreeAbstract Prefix route tree node abstract
-type prefixRouteTreeAbstract interface {
+// PrefixRouteTree Prefix route tree node abstract
+type PrefixRouteTree interface {
 	insert([]string, int)
 	search([]string, int) string
-	matchNode(part string) prefixRouteTreeAbstract
-	matchNodes(part string) []prefixRouteTreeAbstract
+	matchNode(part string) PrefixRouteTree
+	matchNodes(part string) []PrefixRouteTree
 	getUrl() string
 	getPart() string
 	getIsVar() bool
@@ -19,10 +19,10 @@ type prefixRouteTreeAbstract interface {
 }
 
 // prefixRouteTree Global prefix route tree
-var prefixRouteTree prefixRouteTreeAbstract = &treeNode{
+var prefixRouteTree PrefixRouteTree = &treeNode{
 	url:      constant.NullStr,
 	part:     constant.NullStr,
-	children: make([]prefixRouteTreeAbstract, constant.Zero),
+	children: make([]PrefixRouteTree, constant.Zero),
 	isVar:    false,
 }
 
@@ -35,7 +35,7 @@ var prefixRouteTree prefixRouteTreeAbstract = &treeNode{
 type treeNode struct {
 	url      string
 	part     string
-	children []prefixRouteTreeAbstract
+	children []PrefixRouteTree
 	isVar    bool
 	isExist  bool
 }
@@ -92,7 +92,7 @@ func (n *treeNode) search(parts []string, depth int) string {
 }
 
 // matchNode Matches a single node when a node is inserted
-func (n *treeNode) matchNode(part string) prefixRouteTreeAbstract {
+func (n *treeNode) matchNode(part string) PrefixRouteTree {
 	for _, child := range n.children {
 		if child.getPart() == part {
 			return child
@@ -102,8 +102,8 @@ func (n *treeNode) matchNode(part string) prefixRouteTreeAbstract {
 }
 
 // matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
-func (n *treeNode) matchNodes(part string) []prefixRouteTreeAbstract {
-	nodes := make([]prefixRouteTreeAbstract, constant.Zero)
+func (n *treeNode) matchNodes(part string) []PrefixRouteTree {
+	nodes := make([]PrefixRouteTree, constant.Zero)
 	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
 			nodes = append(nodes, child)
