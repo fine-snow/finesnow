@@ -4,6 +4,7 @@ package constant
 
 // Public constant declarations
 const (
+	TCP       = "tcp"
 	Slash     = "/"
 	NullStr   = ""
 	Space     = " "
