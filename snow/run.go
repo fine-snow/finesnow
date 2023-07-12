@@ -18,7 +18,7 @@ import (
 
 // SetLogOutput Custom log middleware
 func SetLogOutput(l logs.LogOutput) {
-	logs.SetLogOutput(l)
+	logs.CustomLogOutput(l)
 }
 
 /**

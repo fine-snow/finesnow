@@ -13,10 +13,12 @@ type LogFunc func(...any)
 type LogfFunc func(string, ...any)
 
 var (
+	outLog   = log.New(os.Stdout, "", 0)
 	infoLog  = log.New(os.Stdout, "\033[34mINFO\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	warnLog  = log.New(os.Stdout, "\033[33mWARN\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	errorLog = log.New(os.Stdout, "\033[31mERROR\033[0m ", log.LstdFlags|log.Lmsgprefix)
 
+	OUT    LogFunc
 	INFO   LogFunc
 	INFOF  LogfFunc
 	WARN   LogFunc
@@ -25,7 +27,9 @@ var (
 	ERRORF LogfFunc
 )
 
+// LogOutput Custom logging middleware constraint interface
 type LogOutput interface {
+	OUT(...any)
 	INFO(...any)
 	INFOF(string, ...any)
 	WARN(...any)
@@ -34,53 +38,72 @@ type LogOutput interface {
 	ERRORF(string, ...any)
 }
 
-func newLogFunc(l *log.Logger) LogFunc {
+func defaultNewLogFunc(l *log.Logger) LogFunc {
 	return func(v ...any) {
 		v = append(v, string(debug.Stack()))
-		l.Println(v)
+		l.Println(v...)
 	}
 }
 
-func newLogfFunc(l *log.Logger) LogfFunc {
+func defaultNewLogfFunc(l *log.Logger) LogfFunc {
 	return func(format string, v ...any) {
 		v = append(v, string(debug.Stack()))
-		l.Printf(format, v)
+		l.Printf(format, v...)
 	}
 }
 
-func newErrorLogFunc(l LogOutput) LogFunc {
+func customNewLogFunc(l LogOutput) LogFunc {
 	return func(v ...any) {
 		v = append(v, string(debug.Stack()))
-		l.ERROR(v)
+		l.ERROR(v...)
 	}
 }
 
-func newErrorLogfFunc(l LogOutput) LogfFunc {
+func customNewLogfFunc(l LogOutput) LogfFunc {
 	return func(format string, v ...any) {
 		v = append(v, string(debug.Stack()))
-		l.ERRORF(format, v)
+		l.ERRORF(format, v...)
 	}
 }
 
+// init Initialization parameters
 func init() {
-	INFO = infoLog.Println
-	INFOF = infoLog.Printf
-	WARN = warnLog.Println
-	WARNF = warnLog.Printf
-	ERRORF = newLogfFunc(errorLog)
-	ERROR = newLogFunc(errorLog)
+	if OUT == nil {
+		OUT = outLog.Println
+	}
+	if INFO == nil {
+		INFO = infoLog.Println
+	}
+	if INFOF == nil {
+		INFOF = infoLog.Printf
+	}
+	if WARN == nil {
+		WARN = warnLog.Println
+	}
+	if WARNF == nil {
+		WARNF = warnLog.Printf
+	}
+	if ERROR == nil {
+		ERROR = defaultNewLogFunc(errorLog)
+	}
+	if ERRORF == nil {
+		ERRORF = defaultNewLogfFunc(errorLog)
+	}
 }
 
-func SetLogOutput(l LogOutput) {
+// CustomLogOutput Custom log middleware
+func CustomLogOutput(l LogOutput) {
 	// Method attribute assignment
+	OUT = l.OUT
 	INFO = l.INFO
 	INFOF = l.INFOF
 	WARN = l.WARN
 	WARNF = l.WARNF
-	ERROR = newErrorLogFunc(l)
-	ERRORF = newErrorLogfFunc(l)
+	ERROR = customNewLogFunc(l)
+	ERRORF = customNewLogfFunc(l)
 
 	// Empty to free memory
+	outLog = nil
 	infoLog = nil
 	warnLog = nil
 	errorLog = nil

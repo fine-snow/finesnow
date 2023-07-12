@@ -4,7 +4,7 @@ package snow
 
 import (
 	"bufio"
-	"fmt"
+	"github.com/fine-snow/finesnow/logs"
 	"os"
 	"runtime"
 	"strings"
@@ -28,11 +28,11 @@ func outputFrameworkInfo() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println("\u001B[36m" + line + "\u001B")
+		logs.OUT("\u001B[36m" + line + "\u001B")
 	}
 	if err = scanner.Err(); err != nil {
 		panic(err)
 	}
-	fmt.Println(ver)
+	logs.OUT(ver)
 	_ = file.Close()
 }
