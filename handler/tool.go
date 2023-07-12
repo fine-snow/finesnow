@@ -5,7 +5,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"github.com/fine-snow/finesnow/constant"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -57,7 +56,7 @@ func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files 
 			if t.String() == pMultipartFileHeader {
 				headers := files[k]
 				if headers != nil {
-					in[i] = reflect.ValueOf(headers[constant.Zero])
+					in[i] = reflect.ValueOf(headers[0])
 				} else {
 					var header *multipart.FileHeader
 					in[i] = reflect.ValueOf(header)
@@ -71,7 +70,7 @@ func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files 
 			if t.String() == multipartFileHeader {
 				headers := files[k]
 				if headers != nil {
-					in[i] = reflect.ValueOf(*(headers[constant.Zero]))
+					in[i] = reflect.ValueOf(*(headers[0]))
 				} else {
 					in[i] = reflect.ValueOf(multipart.FileHeader{})
 				}
@@ -102,17 +101,17 @@ func dealInParam(paramNames []string, rt reflect.Type, values url.Values, files 
 		case reflect.String:
 			in[i] = reflect.ValueOf(values.Get(k))
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			v, _ := strconv.ParseInt(values.Get(k), constant.Zero, constant.SixtyFour)
+			v, _ := strconv.ParseInt(values.Get(k), 0, 64)
 			elem := reflect.New(t).Elem()
 			elem.SetInt(v)
 			in[i] = elem
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			v, _ := strconv.ParseUint(values.Get(k), constant.Zero, constant.SixtyFour)
+			v, _ := strconv.ParseUint(values.Get(k), 0, 64)
 			elem := reflect.New(t).Elem()
 			elem.SetUint(v)
 			in[i] = elem
 		case reflect.Float32, reflect.Float64:
-			v, _ := strconv.ParseFloat(values.Get(k), constant.SixtyFour)
+			v, _ := strconv.ParseFloat(values.Get(k), 64)
 			elem := reflect.New(t).Elem()
 			elem.SetFloat(v)
 			in[i] = elem

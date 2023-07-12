@@ -3,7 +3,6 @@
 package handler
 
 import (
-	"github.com/fine-snow/finesnow/constant"
 	"net/http"
 	"strings"
 )
@@ -42,14 +41,14 @@ func SetAllowedHeaders(s []string) {
 func allowCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ori := r.Header.Get(origin)
-		if ori != constant.NullStr {
+		if ori != "" {
 			// Set CORS headers on response
-			w.Header().Set(allowMethods, strings.Join(allowedMethods, constant.Comma))
-			w.Header().Set(allowHeaders, strings.Join(allowedHeaders, constant.Comma))
+			w.Header().Set(allowMethods, strings.Join(allowedMethods, ","))
+			w.Header().Set(allowHeaders, strings.Join(allowedHeaders, ","))
 			w.Header().Set(allowOrigin, allowedOrigin)
 			// Handle preflight request
 			if r.Method == http.MethodOptions {
-				w.Header().Set(allow, strings.Join(allowedMethods, constant.Comma))
+				w.Header().Set(allow, strings.Join(allowedMethods, ","))
 				w.Header().Set(maxAge, maxAgeValue)
 				w.WriteHeader(http.StatusNoContent)
 				return

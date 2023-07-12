@@ -2,10 +2,6 @@
 
 package router
 
-import (
-	"github.com/fine-snow/finesnow/constant"
-)
-
 // PrefixRouteTree Prefix route tree node abstract
 type PrefixRouteTree interface {
 	insert([]string, int)
@@ -20,9 +16,9 @@ type PrefixRouteTree interface {
 
 // prefixRouteTree Global prefix route tree
 var prefixRouteTree PrefixRouteTree = &treeNode{
-	url:      constant.NullStr,
-	part:     constant.NullStr,
-	children: make([]PrefixRouteTree, constant.Zero),
+	url:      "",
+	part:     "",
+	children: make([]PrefixRouteTree, 0),
 	isVar:    false,
 }
 
@@ -61,14 +57,14 @@ func (n *treeNode) insert(parts []string, depth int) {
 	part := parts[depth]
 	nd := n.matchNode(part)
 	if nd == nil {
-		nd = &treeNode{url: n.url + constant.Slash + part, part: part, isVar: part[constant.Zero] == constant.Colon}
+		nd = &treeNode{url: n.url + "/" + part, part: part, isVar: part[0] == ':'}
 		n.children = append(n.children, nd)
 	}
-	if len(parts) == (depth + constant.One) {
+	if len(parts) == (depth + 1) {
 		nd.setIsExist(true)
 		return
 	}
-	nd.insert(parts, depth+constant.One)
+	nd.insert(parts, depth+1)
 }
 
 // search Query the real URL through route tree matching
@@ -77,18 +73,18 @@ func (n *treeNode) search(parts []string, depth int) string {
 		if n.isExist {
 			return n.url
 		} else {
-			return constant.NullStr
+			return ""
 		}
 	}
 	part := parts[depth]
 	nodes := n.matchNodes(part)
 	for _, nd := range nodes {
-		url := nd.search(parts, depth+constant.One)
-		if url != constant.NullStr {
+		url := nd.search(parts, depth+1)
+		if url != "" {
 			return url
 		}
 	}
-	return constant.NullStr
+	return ""
 }
 
 // matchNode Matches a single node when a node is inserted
@@ -103,7 +99,7 @@ func (n *treeNode) matchNode(part string) PrefixRouteTree {
 
 // matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
 func (n *treeNode) matchNodes(part string) []PrefixRouteTree {
-	nodes := make([]PrefixRouteTree, constant.Zero)
+	nodes := make([]PrefixRouteTree, 0)
 	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
 			nodes = append(nodes, child)

@@ -4,7 +4,6 @@ package router
 
 import (
 	"errors"
-	"github.com/fine-snow/finesnow/constant"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -29,7 +28,7 @@ var (
 	putRouteModelMap    = make(map[string]RouteModel)
 	deleteRouteModelMap = make(map[string]RouteModel)
 
-	allRouteSlice = make([]*traRouteModel, constant.Zero)
+	allRouteSlice = make([]*traRouteModel, 0)
 )
 
 // checkFun Verify the validity of the fun parameter
@@ -37,7 +36,7 @@ func checkFun(t reflect.Type) {
 	if t.Kind() != reflect.Func {
 		panic(errRouteAddNotFunc)
 	}
-	if t.NumOut() > constant.One {
+	if t.NumOut() > 1 {
 		panic(errRouteFuncOutAbnormal)
 	}
 }
@@ -52,8 +51,8 @@ func put(url string, rm RouteModel, m map[string]RouteModel) {
 
 // dynamicRoute Dynamic route handling methods
 func dynamicRoute(url string) {
-	parts := strings.Split(url, constant.Slash)
-	prefixRouteTree.insert(parts[constant.One:], constant.Zero)
+	parts := strings.Split(url, "/")
+	prefixRouteTree.insert(parts[1:], 0)
 }
 
 // putSelect Select the corresponding routing model collection to add it
@@ -75,18 +74,18 @@ func putSelect(url, method string, rm RouteModel) {
 func Get(url, method string, r *http.Request) RouteModel {
 	switch method {
 	case http.MethodGet:
-		parts := strings.Split(url, constant.Slash)
-		realUrl := prefixRouteTree.search(parts[constant.One:], constant.Zero)
-		if realUrl == constant.NullStr {
+		parts := strings.Split(url, "/")
+		realUrl := prefixRouteTree.search(parts[1:], 0)
+		if realUrl == "" {
 			return nil
 		}
-		realUrlParts := strings.Split(realUrl, constant.Slash)
-		for i, part := range realUrlParts[constant.One:] {
-			if part[constant.Zero] == constant.Colon {
-				if r.URL.RawQuery == constant.NullStr {
-					r.URL.RawQuery = part[constant.One:] + constant.EqualSign + parts[i+constant.One]
+		realUrlParts := strings.Split(realUrl, "/")
+		for i, part := range realUrlParts[1:] {
+			if part[0] == ':' {
+				if r.URL.RawQuery == "" {
+					r.URL.RawQuery = part[1:] + "=" + parts[i+1]
 				} else {
-					r.URL.RawQuery = r.URL.RawQuery + constant.Ampersand + part[constant.One:] + constant.EqualSign + parts[i+constant.One]
+					r.URL.RawQuery = r.URL.RawQuery + "&" + part[1:] + "=" + parts[i+1]
 				}
 			}
 		}
@@ -103,26 +102,26 @@ func Get(url, method string, r *http.Request) RouteModel {
 }
 
 func dealPrefixSlash(url string) string {
-	if strings.HasPrefix(url, constant.Slash) {
-		return dealPrefixSlash(url[constant.One:])
+	if strings.HasPrefix(url, "/") {
+		return dealPrefixSlash(url[1:])
 	} else {
-		return constant.Slash + url
+		return "/" + url
 	}
 }
 
 func dealSuffixSlash(url string) string {
-	if strings.HasSuffix(url, constant.Slash) {
-		return dealSuffixSlash(url[:len(url)-constant.One])
+	if strings.HasSuffix(url, "/") {
+		return dealSuffixSlash(url[:len(url)-1])
 	} else {
 		return url
 	}
 }
 
 func checkUrl(url string) string {
-	url = strings.ReplaceAll(url, constant.Space, constant.NullStr)
+	url = strings.ReplaceAll(url, " ", "")
 	url = dealPrefixSlash(url)
 	url = dealSuffixSlash(url)
-	if url == constant.NullStr || url == constant.Slash {
+	if url == "" || url == "/" {
 		panic(errRouteUrlIsNilOrSlash)
 	}
 	return url
@@ -137,8 +136,8 @@ func dealRoute(group, url, method string, fun any) {
 	t := reflect.TypeOf(fun)
 	checkFun(t)
 	rm := &routeModel{t: t, hct: textPlain}
-	if t.NumOut() > constant.Zero {
-		switch t.Out(constant.Zero).Kind() {
+	if t.NumOut() > 0 {
+		switch t.Out(0).Kind() {
 		case reflect.Bool,
 			reflect.String,
 			reflect.Float32, reflect.Float64,
@@ -152,11 +151,11 @@ func dealRoute(group, url, method string, fun any) {
 		}
 	}
 	rm.v = reflect.ValueOf(fun)
-	if t.NumIn() > constant.Zero {
+	if t.NumIn() > 0 {
 		pc := rm.v.Pointer()
 		funPc := runtime.FuncForPC(pc)
-		split := strings.Split(funPc.Name(), constant.Dot)
-		funcName := split[len(split)-constant.One]
+		split := strings.Split(funPc.Name(), ".")
+		funcName := split[len(split)-1]
 		fileName, _ := funPc.FileLine(pc)
 		var af *ast.File
 		if f, ok := astFileMap[fileName]; ok {
