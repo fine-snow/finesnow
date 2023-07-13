@@ -170,6 +170,11 @@ func SetGlobalErrHandle(fun handler.ErrHandleFunc) {
 // intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil
 func Run(addr string, intercept handler.Interceptor) {
 
+	// addr check
+	if addr == "" {
+		addr = ":9801"
+	}
+
 	// Capture startup exceptions
 	defer handler.CatchRunPanic()
 
