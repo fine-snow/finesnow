@@ -176,6 +176,12 @@ func Run(addr string, intercept handler.Interceptor) {
 	// Output framework logo version and other information
 	outputFrameworkInfo()
 
+	// addr check
+	if addr == "" {
+		addr = ":9801"
+		logs.WARN("You are using the default port 9801 to start the framework")
+	}
+
 	// Receive abnormal parameter declaration
 	var err error
 
