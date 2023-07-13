@@ -170,16 +170,17 @@ func SetGlobalErrHandle(fun handler.ErrHandleFunc) {
 // intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil
 func Run(addr string, intercept handler.Interceptor) {
 
-	// addr check
-	if addr == "" {
-		addr = ":9801"
-	}
-
 	// Capture startup exceptions
 	defer handler.CatchRunPanic()
 
 	// Output framework logo version and other information
 	outputFrameworkInfo()
+
+	// addr check
+	if addr == "" {
+		addr = ":9801"
+		logs.WARN("You are using the default port 9801 to start the framework")
+	}
 
 	// Receive abnormal parameter declaration
 	var err error
