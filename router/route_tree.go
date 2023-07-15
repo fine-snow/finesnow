@@ -1,4 +1,4 @@
-// Prefix route tree
+// Prefix route tree function
 
 package router
 
