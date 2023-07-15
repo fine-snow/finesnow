@@ -24,19 +24,37 @@ const (
 	maxMemory       int64 = 1048576
 )
 
-// globalHandle HTTP Request Receiving And Processing Abstract Interface Implementation Body
-// intercept Global interceptor properties.
-type globalHandle struct {
-	intercept Interceptor
+// Interceptor Abstract Method
+// Returning true indicates a release request, while false indicates the opposite.
+type Interceptor func(http.ResponseWriter, *http.Request) bool
+
+var intercept Interceptor
+
+func SetIntercept(i Interceptor) {
+	intercept = i
 }
 
-func NewHandle(intercept Interceptor) http.Handler {
-	handle := allowCORS(&globalHandle{intercept})
+// PostProcessor Abstract Method
+// The routing function is called when the return value is finished processing data.
+type PostProcessor func(v reflect.Value) reflect.Value
+
+var postProcess PostProcessor
+
+func SetPostProcess(p PostProcessor) {
+	postProcess = p
+}
+
+// snowHandler HTTP Request Receiving And Processing Abstract Interface Implementation Body
+type snowHandler struct {
+}
+
+func NewHandle() http.Handler {
+	handle := allowCORS(&snowHandler{})
 	return handle
 }
 
 // ServeHTTP Implement the golang underlying Handler interface
-func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
 	route := router.Get(path, method, r)
@@ -51,7 +69,7 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	numIn := rt.NumIn()
 	names := route.GetParamNames()
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
-	if gh.intercept != nil && !gh.intercept(w, r) {
+	if intercept != nil && !intercept(w, r) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -61,7 +79,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		val := outParam[0]
+		if postProcess != nil {
+			val = postProcess(val)
+		}
+		_, _ = w.Write(convertToByteArray(val))
 		return
 	}
 	if method == http.MethodGet {
@@ -69,7 +91,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		val := outParam[0]
+		if postProcess != nil {
+			val = postProcess(val)
+		}
+		_, _ = w.Write(convertToByteArray(val))
 		return
 	}
 	ct := r.Header.Get(contentType)
@@ -100,7 +126,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		val := outParam[0]
+		if postProcess != nil {
+			val = postProcess(val)
+		}
+		_, _ = w.Write(convertToByteArray(val))
 		return
 	}
 	_ = r.ParseMultipartForm(maxMemory)
@@ -110,7 +140,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		val := outParam[0]
+		if postProcess != nil {
+			val = postProcess(val)
+		}
+		_, _ = w.Write(convertToByteArray(val))
 		return
 	}
 	postForm := r.PostForm
@@ -119,7 +153,11 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		_, _ = w.Write(convertToByteArray(outParam[0]))
+		val := outParam[0]
+		if postProcess != nil {
+			val = postProcess(val)
+		}
+		_, _ = w.Write(convertToByteArray(val))
 		return
 	}
 }
@@ -127,12 +165,12 @@ func (gh *globalHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // ErrHandleFunc Abstract Method
 type ErrHandleFunc func(err any) any
 
-// globalErrHandleFunc Global Exception Handling Function Variables
-var globalErrHandleFunc ErrHandleFunc
+// errHandleFunc Global Exception Handling Function Variables
+var errHandleFunc ErrHandleFunc
 
-// SetGlobalErrHandleFunc Set global exception handling functions
-func SetGlobalErrHandleFunc(fun ErrHandleFunc) {
-	globalErrHandleFunc = fun
+// SetErrHandleFunc Set global exception handling functions
+func SetErrHandleFunc(fun ErrHandleFunc) {
+	errHandleFunc = fun
 }
 
 // catchHttpPanic Capture exceptions thrown during http request processing
@@ -145,8 +183,8 @@ func catchHttpPanic(w http.ResponseWriter) {
 		case runtime.Error:
 			_, _ = w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		default:
-			if globalErrHandleFunc != nil {
-				err = globalErrHandleFunc(err)
+			if errHandleFunc != nil {
+				err = errHandleFunc(err)
 			}
 			errBytes := convertToByteArray(reflect.ValueOf(err))
 			_, _ = w.Write(errBytes)
