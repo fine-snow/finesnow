@@ -52,20 +52,6 @@ func defaultNewLogfFunc(l *log.Logger) LogfFunc {
 	}
 }
 
-func customNewLogFunc(l LogOutput) LogFunc {
-	return func(v ...any) {
-		v = append(v, string(debug.Stack()))
-		l.ERROR(v...)
-	}
-}
-
-func customNewLogfFunc(l LogOutput) LogfFunc {
-	return func(format string, v ...any) {
-		v = append(v, string(debug.Stack()))
-		l.ERRORF(format, v...)
-	}
-}
-
 // init Initialization parameters
 func init() {
 	if OUT == nil {
@@ -99,8 +85,8 @@ func CustomLogOutput(l LogOutput) {
 	INFOF = l.INFOF
 	WARN = l.WARN
 	WARNF = l.WARNF
-	ERROR = customNewLogFunc(l)
-	ERRORF = customNewLogfFunc(l)
+	ERROR = l.ERROR
+	ERRORF = l.ERRORF
 
 	// Empty to free memory
 	outLog = nil
