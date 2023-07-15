@@ -36,7 +36,7 @@ func SetIntercept(i Interceptor) {
 
 // PostProcessor Abstract Method
 // The routing function is called when the return value is finished processing data.
-type PostProcessor func(v reflect.Value) reflect.Value
+type PostProcessor func(v any) any
 
 var postProcess PostProcessor
 
@@ -79,11 +79,10 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		val := outParam[0]
 		if postProcess != nil {
-			val = postProcess(val)
+			outParam[0] = reflect.ValueOf(postProcess(outParam[0].Interface()))
 		}
-		_, _ = w.Write(convertToByteArray(val))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	if method == http.MethodGet {
@@ -91,11 +90,10 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		val := outParam[0]
 		if postProcess != nil {
-			val = postProcess(val)
+			outParam[0] = reflect.ValueOf(postProcess(outParam[0].Interface()))
 		}
-		_, _ = w.Write(convertToByteArray(val))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	ct := r.Header.Get(contentType)
@@ -126,11 +124,10 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		val := outParam[0]
 		if postProcess != nil {
-			val = postProcess(val)
+			outParam[0] = reflect.ValueOf(postProcess(outParam[0].Interface()))
 		}
-		_, _ = w.Write(convertToByteArray(val))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	_ = r.ParseMultipartForm(maxMemory)
@@ -140,11 +137,10 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		val := outParam[0]
 		if postProcess != nil {
-			val = postProcess(val)
+			outParam[0] = reflect.ValueOf(postProcess(outParam[0].Interface()))
 		}
-		_, _ = w.Write(convertToByteArray(val))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 	postForm := r.PostForm
@@ -153,11 +149,10 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if outParam == nil {
 			return
 		}
-		val := outParam[0]
 		if postProcess != nil {
-			val = postProcess(val)
+			outParam[0] = reflect.ValueOf(postProcess(outParam[0].Interface()))
 		}
-		_, _ = w.Write(convertToByteArray(val))
+		_, _ = w.Write(convertToByteArray(outParam[0]))
 		return
 	}
 }
