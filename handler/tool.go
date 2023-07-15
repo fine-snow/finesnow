@@ -26,19 +26,19 @@ const (
 )
 
 // convertToByteArray Convert the reflection.Value of a value into a byte array
-func convertToByteArray(value reflect.Value) []byte {
-	switch value.Kind() {
+func convertToByteArray(val reflect.Value) []byte {
+	switch val.Kind() {
 	case reflect.Bool,
 		reflect.Struct,
 		reflect.Float32, reflect.Float64,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		bytes, _ := json.Marshal(value.Interface())
+		bytes, _ := json.Marshal(val.Interface())
 		return bytes
 	case reflect.String:
-		return []byte(value.String())
+		return []byte(val.String())
 	case reflect.Pointer, reflect.Interface:
-		return convertToByteArray(value.Elem())
+		return convertToByteArray(val.Elem())
 	default:
 		panic(outRange)
 	}
