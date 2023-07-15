@@ -195,10 +195,16 @@ func SetPostProcessor(postProcess handler.PostProcessor) {
  * End
  */
 
+// addr Launch IP and port
+var addr string
+
+// SetAddr Configure the startup IP and port
+func SetAddr(s string) {
+	addr = s
+}
+
 // Run Framework Launch Method
-// addr Start address parameter, for example: 127.0.0.1:8088.
-// intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil.
-func Run(addr string) {
+func Run() {
 
 	// Capture startup exceptions
 	defer handler.CatchRunPanic()
