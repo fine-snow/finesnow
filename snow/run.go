@@ -215,7 +215,7 @@ func Run() {
 	// addr check
 	if addr == "" {
 		addr = ":9801"
-		logs.WARN("You are using the default port 9801 to start the framework")
+		logs.WARN("Using the default port 9801 to start the framework")
 	}
 
 	// Receive abnormal parameter declaration
