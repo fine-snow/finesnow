@@ -52,9 +52,8 @@ func main() {
 	// 项目启动后, 浏览器访问 http://localhost:9801/sayHello?name=Tom 得到 Tom Say Hello World, 一个带入参的 GET HTTP 请求就实现了
 	snow.Get("/sayHello", sayHello)
 	
-	// Run function startup framework
-	// Default port: 9801
-	// Run 函数启动框架
+	// Run function startup framework; Default port: 9801
+	// Run 函数启动框架; 默认端口: 9801
 	snow.Run()
 }
 ```
