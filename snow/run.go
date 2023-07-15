@@ -151,13 +151,13 @@ func SetAllowedHeaders(s []string) {
  */
 
 /**
- * Global Exception Handling Function
+ * Global exception handling function
  * Start
  */
 
-// SetGlobalErrHandle Set global exception handling functions
+// SetGlobalErrHandle Set the global exception handling function
 func SetGlobalErrHandle(fun handler.ErrHandleFunc) {
-	handler.SetGlobalErrHandleFunc(fun)
+	handler.SetErrHandleFunc(fun)
 }
 
 /**
@@ -165,10 +165,40 @@ func SetGlobalErrHandle(fun handler.ErrHandleFunc) {
  * End
  */
 
+/**
+ * Interceptor function
+ * Start
+ */
+
+// SetInterceptor Set the global interceptor function
+func SetInterceptor(intercept handler.Interceptor) {
+	handler.SetIntercept(intercept)
+}
+
+/**
+ * Interceptor function
+ * End
+ */
+
+/**
+ * Postprocessor function
+ * Start
+ */
+
+// SetPostProcessor Set the global post processor function
+func SetPostProcessor(postProcess handler.PostProcessor) {
+	handler.SetPostProcess(postProcess)
+}
+
+/**
+ * Postprocessor function
+ * End
+ */
+
 // Run Framework Launch Method
-// addr Start address parameter, for example: 127.0.0.1:8088
-// intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil
-func Run(addr string, intercept handler.Interceptor) {
+// addr Start address parameter, for example: 127.0.0.1:8088.
+// intercept Global interceptor parameter, if the interceptor function is not required, this parameter can be passed to nil.
+func Run(addr string) {
 
 	// Capture startup exceptions
 	defer handler.CatchRunPanic()
@@ -194,7 +224,7 @@ func Run(addr string, intercept handler.Interceptor) {
 	}
 
 	// Generate HTTP processing function parameters
-	handle := handler.NewHandle(intercept)
+	handle := handler.NewHandle()
 
 	// Configure service startup parameters
 	server := &http.Server{
