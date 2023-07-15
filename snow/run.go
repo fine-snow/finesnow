@@ -161,7 +161,7 @@ func SetGlobalErrHandle(fun handler.ErrHandleFunc) {
 }
 
 /**
- * Global Exception Handling Function
+ * Global exception handling function
  * End
  */
 
