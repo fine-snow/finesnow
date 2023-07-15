@@ -101,6 +101,7 @@ func Get(url, method string, r *http.Request) RouteModel {
 	}
 }
 
+// dealPrefixSlash Processing path prefixes
 func dealPrefixSlash(url string) string {
 	if strings.HasPrefix(url, "/") {
 		return dealPrefixSlash(url[1:])
@@ -109,6 +110,7 @@ func dealPrefixSlash(url string) string {
 	}
 }
 
+// dealSuffixSlash Processing path suffixes
 func dealSuffixSlash(url string) string {
 	if strings.HasSuffix(url, "/") {
 		return dealSuffixSlash(url[:len(url)-1])
@@ -117,6 +119,7 @@ func dealSuffixSlash(url string) string {
 	}
 }
 
+// checkUrl Verify the routing path
 func checkUrl(url string) string {
 	url = strings.ReplaceAll(url, " ", "")
 	url = dealPrefixSlash(url)
