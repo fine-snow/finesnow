@@ -54,6 +54,6 @@ func main() {
 	
 	// Run function startup framework: addr parameter is the IP and port to be started (null character, default port: 9801); The intercept parameter is a global interceptor
 	// Run 函数启动框架: addr 参数为需要启动的ip和端口(传空字符, 默认端口: 9801); intercept 参数为全局拦截器
-	snow.Run("", nil)
+	snow.Run()
 }
 ```
