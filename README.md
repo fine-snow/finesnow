@@ -52,8 +52,9 @@ func main() {
 	// 项目启动后, 浏览器访问 http://localhost:9801/sayHello?name=Tom 得到 Tom Say Hello World, 一个带入参的 GET HTTP 请求就实现了
 	snow.Get("/sayHello", sayHello)
 	
-	// Run function startup framework: addr parameter is the IP and port to be started (null character, default port: 9801); The intercept parameter is a global interceptor
-	// Run 函数启动框架: addr 参数为需要启动的ip和端口(传空字符, 默认端口: 9801); intercept 参数为全局拦截器
-	snow.Run("", nil)
+	// Run function startup framework
+	// Default port: 9801
+	// Run 函数启动框架
+	snow.Run()
 }
 ```
