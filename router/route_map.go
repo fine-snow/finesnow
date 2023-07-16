@@ -71,13 +71,13 @@ func putSelect(url, method string, rm RouteModel) {
 }
 
 // Get Based on the URL, method finds the corresponding routing model
-func Get(url, method string, r *http.Request) RouteModel {
+func Get(url, method string, r *http.Request) (string, RouteModel) {
 	switch method {
 	case http.MethodGet:
 		parts := strings.Split(url, "/")
 		realUrl := prefixRouteTree.search(parts[1:], 0)
 		if realUrl == "" {
-			return nil
+			return url, nil
 		}
 		realUrlParts := strings.Split(realUrl, "/")
 		for i, part := range realUrlParts[1:] {
@@ -89,15 +89,15 @@ func Get(url, method string, r *http.Request) RouteModel {
 				}
 			}
 		}
-		return getRouteModelMap[realUrl]
+		return realUrl, getRouteModelMap[realUrl]
 	case http.MethodPost:
-		return postRouteModelMap[url]
+		return url, postRouteModelMap[url]
 	case http.MethodPut:
-		return putRouteModelMap[url]
+		return url, putRouteModelMap[url]
 	case http.MethodDelete:
-		return deleteRouteModelMap[url]
+		return url, deleteRouteModelMap[url]
 	default:
-		return nil
+		return url, nil
 	}
 }
 
