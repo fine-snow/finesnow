@@ -58,8 +58,8 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
 	realUrl, route := router.Get(path, method, r)
-	defer catchHttpPanic(w, realUrl, method)
 	if route == nil {
+		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m%v\u001B[0m", method, realUrl, http.StatusNotFound)
 		text := http.StatusText(http.StatusNotFound)
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte(text))
@@ -71,9 +71,11 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	names := route.GetParamNames()
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if intercept != nil && !intercept(w, r) {
+		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m%v\u001B[0m", method, realUrl, http.StatusForbidden)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+	defer catchHttpPanic(w, realUrl, method)
 	if numIn == 0 {
 		outParam := rv.Call(nil)
 		if outParam == nil {
