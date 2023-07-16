@@ -59,10 +59,9 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
 	realUrl, route := router.Get(path, method, r)
 	if route == nil {
-		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m%v\u001B[0m", method, realUrl, http.StatusNotFound)
-		text := http.StatusText(http.StatusNotFound)
+		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m404\u001B[0m", method, realUrl)
 		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(text))
+		_, _ = w.Write([]byte("Not Found"))
 		return
 	}
 	rt := route.GetType()
@@ -71,8 +70,9 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	names := route.GetParamNames()
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if intercept != nil && !intercept(w, r) {
-		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m%v\u001B[0m", method, realUrl, http.StatusForbidden)
+		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m403\u001B[0m", method, realUrl)
 		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte("Forbidden"))
 		return
 	}
 	defer catchHttpPanic(w, realUrl, method)
@@ -175,7 +175,7 @@ func catchHttpPanic(w http.ResponseWriter, url, method string) {
 	err := recover()
 	if err != nil {
 		logs.ERROR(err)
-		logs.ERRORF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[31m%v\u001B[0m", method, url, http.StatusInternalServerError)
+		logs.ERRORF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[31m500\u001B[0m", method, url)
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
@@ -189,7 +189,7 @@ func catchHttpPanic(w http.ResponseWriter, url, method string) {
 		}
 		return
 	}
-	logs.INFOF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[32m%v\u001B[0m", method, url, http.StatusOK)
+	logs.INFOF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[32m200\u001B[0m", method, url)
 }
 
 // CatchRunPanic Capture exceptions generated during framework startup process
