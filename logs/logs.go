@@ -48,7 +48,7 @@ func defaultNewLogFunc(l *log.Logger) LogFunc {
 func defaultNewLogfFunc(l *log.Logger) LogfFunc {
 	return func(format string, v ...any) {
 		v = append(v, string(debug.Stack()))
-		l.Printf(format, v...)
+		l.Printf(format+" %s", v...)
 	}
 }
 
