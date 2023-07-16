@@ -57,7 +57,8 @@ func NewHandle() http.Handler {
 func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
-	route := router.Get(path, method, r)
+	realUrl, route := router.Get(path, method, r)
+	defer catchHttpPanic(w, realUrl, method)
 	if route == nil {
 		text := http.StatusText(http.StatusNotFound)
 		w.WriteHeader(http.StatusNotFound)
@@ -73,7 +74,6 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	defer catchHttpPanic(w)
 	if numIn == 0 {
 		outParam := rv.Call(nil)
 		if outParam == nil {
@@ -169,10 +169,11 @@ func SetErrHandleFunc(fun ErrHandleFunc) {
 }
 
 // catchHttpPanic Capture exceptions thrown during http request processing
-func catchHttpPanic(w http.ResponseWriter) {
+func catchHttpPanic(w http.ResponseWriter, url, method string) {
 	err := recover()
 	if err != nil {
 		logs.ERROR(err)
+		logs.ERRORF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[31m%v\u001B[0m", method, url, http.StatusInternalServerError)
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
@@ -186,6 +187,7 @@ func catchHttpPanic(w http.ResponseWriter) {
 		}
 		return
 	}
+	logs.INFOF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[32m%v\u001B[0m", method, url, http.StatusOK)
 }
 
 // CatchRunPanic Capture exceptions generated during framework startup process
