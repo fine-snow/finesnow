@@ -174,22 +174,21 @@ func SetErrHandleFunc(fun ErrHandleFunc) {
 func catchHttpPanic(w http.ResponseWriter, url, method string) {
 	err := recover()
 	if err != nil {
-		logs.ERROR(err)
-		logs.ERRORF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[31m500\u001B[0m", method, url)
+		if errHandleFunc != nil {
+			err = errHandleFunc(err)
+		}
+		errBytes := convertToByteArray(reflect.ValueOf(err))
+		logs.ERRORF("%s; Http Request | Method: %s, Url: %s, Status: \u001B[31m500\u001B[0m", string(errBytes), method, url)
 		w.WriteHeader(http.StatusInternalServerError)
 		switch err.(type) {
 		case runtime.Error:
-			_, _ = w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+			_, _ = w.Write([]byte("Internal Server Error"))
 		default:
-			if errHandleFunc != nil {
-				err = errHandleFunc(err)
-			}
-			errBytes := convertToByteArray(reflect.ValueOf(err))
 			_, _ = w.Write(errBytes)
 		}
 		return
 	}
-	logs.INFOF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[32m200\u001B[0m", method, url)
+	logs.INFOF("Http Request | Method: %s, Url: %s, Status: \u001B[32m200\u001B[0m", method, url)
 }
 
 // CatchRunPanic Capture exceptions generated during framework startup process
