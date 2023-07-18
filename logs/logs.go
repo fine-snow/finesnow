@@ -8,8 +8,10 @@ import (
 	"runtime/debug"
 )
 
+// LogFunc Log output constraint method
 type LogFunc func(...any)
 
+// LogfFunc Log output constraint method
 type LogfFunc func(string, ...any)
 
 var (
