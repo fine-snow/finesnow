@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"net/http"
+	"net/url"
 	"reflect"
 	"runtime"
 	"strings"
@@ -71,33 +72,36 @@ func putSelect(url, method string, rm RouteModel) {
 }
 
 // Get Based on the URL, method finds the corresponding routing model
-func Get(url, method string, r *http.Request) (string, RouteModel) {
+func Get(u, method string, r *http.Request) (string, RouteModel) {
 	switch method {
 	case http.MethodGet:
-		parts := strings.Split(url, "/")
+		parts := strings.Split(u, "/")
 		realUrl := prefixRouteTree.search(parts[1:], 0)
 		if realUrl == "" {
-			return url, nil
+			return u, nil
 		}
-		realUrlParts := strings.Split(realUrl, "/")
-		for i, part := range realUrlParts[1:] {
+		realUrlParts := strings.Split(realUrl, "/")[1:]
+		r.Form = make(url.Values, len(realUrlParts))
+		for i, part := range realUrlParts {
 			if part[0] == ':' {
-				if r.URL.RawQuery == "" {
-					r.URL.RawQuery = part[1:] + "=" + parts[i+1]
-				} else {
-					r.URL.RawQuery = r.URL.RawQuery + "&" + part[1:] + "=" + parts[i+1]
-				}
+				r.Form.Set(part[1:], parts[i+1])
+			}
+		}
+		if r.URL.RawQuery != "" {
+			query := r.URL.Query()
+			for k, v := range query {
+				r.Form.Set(k, v[0])
 			}
 		}
 		return realUrl, getRouteModelMap[realUrl]
 	case http.MethodPost:
-		return url, postRouteModelMap[url]
+		return u, postRouteModelMap[u]
 	case http.MethodPut:
-		return url, putRouteModelMap[url]
+		return u, putRouteModelMap[u]
 	case http.MethodDelete:
-		return url, deleteRouteModelMap[url]
+		return u, deleteRouteModelMap[u]
 	default:
-		return url, nil
+		return u, nil
 	}
 }
 
