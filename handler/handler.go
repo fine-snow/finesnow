@@ -88,7 +88,7 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if method == http.MethodGet {
-		outParam := rv.Call(dealInParam(names, rt, r.URL.Query(), nil, w, r))
+		outParam := rv.Call(dealInParam(names, rt, r.Form, nil, w, r))
 		if outParam == nil {
 			return
 		}
