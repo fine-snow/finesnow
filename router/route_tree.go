@@ -99,11 +99,14 @@ func (n *treeNode) matchNode(part string) PrefixRouteTree {
 
 // matchNodes Multiple nodes are matched when querying for real URLs through the routing tree
 func (n *treeNode) matchNodes(part string) []PrefixRouteTree {
-	nodes := make([]PrefixRouteTree, 0)
-	for _, child := range n.children {
+	l := len(n.children)
+	index := 0
+	nodes := make([]PrefixRouteTree, l, l)
+	for i, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
-			nodes = append(nodes, child)
+			nodes[i] = child
+			index++
 		}
 	}
-	return nodes
+	return nodes[:index]
 }
