@@ -75,8 +75,8 @@ func putSelect(url, method string, rm RouteModel) {
 func Get(u, method string, r *http.Request) (string, RouteModel) {
 	switch method {
 	case http.MethodGet:
-		parts := strings.Split(u, "/")
-		realUrl := prefixRouteTree.search(parts[1:], 0)
+		parts := strings.Split(u, "/")[1:]
+		realUrl := prefixRouteTree.search(parts, 0)
 		if realUrl == "" {
 			return u, nil
 		}
@@ -84,7 +84,7 @@ func Get(u, method string, r *http.Request) (string, RouteModel) {
 		r.Form = make(url.Values, len(realUrlParts))
 		for i, part := range realUrlParts {
 			if part[0] == ':' {
-				r.Form.Set(part[1:], parts[i+1])
+				r.Form.Set(part[1:], parts[i])
 			}
 		}
 		if r.URL.RawQuery != "" {
