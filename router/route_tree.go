@@ -102,9 +102,9 @@ func (n *treeNode) matchNodes(part string) []PrefixRouteTree {
 	l := len(n.children)
 	index := 0
 	nodes := make([]PrefixRouteTree, l, l)
-	for i, child := range n.children {
+	for _, child := range n.children {
 		if child.getPart() == part || child.getIsVar() {
-			nodes[i] = child
+			nodes[index] = child
 			index++
 		}
 	}

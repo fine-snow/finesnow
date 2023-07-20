@@ -59,7 +59,7 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
 	realUrl, route := router.Get(path, method, r)
 	if route == nil {
-		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m404\u001B[0m", method, realUrl)
+		logs.DEBUGF("Http Request | Method: %s, Url: %s, Status: \u001B[33m404\u001B[0m", method, realUrl)
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write([]byte("Not Found"))
 		return
@@ -70,7 +70,7 @@ func (sh *snowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	names := route.GetParamNames()
 	w.Header().Set(contentType, string(*route.GetHttpContentType()))
 	if intercept != nil && !intercept(w, r) {
-		logs.WARNF("HTTP REQUEST ===> METHOD: %s, URL: %s, STATUS: \u001B[33m403\u001B[0m", method, realUrl)
+		logs.DEBUGF("Http Request | Method: %s, Url: %s, Status: \u001B[33m403\u001B[0m", method, realUrl)
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write([]byte("Forbidden"))
 		return
@@ -188,7 +188,7 @@ func catchHttpPanic(w http.ResponseWriter, url, method string) {
 		}
 		return
 	}
-	logs.INFOF("Http Request | Method: %s, Url: %s, Status: \u001B[32m200\u001B[0m", method, url)
+	logs.DEBUGF("Http Request | Method: %s, Url: %s, Status: \u001B[32m200\u001B[0m", method, url)
 }
 
 // CatchRunPanic Capture exceptions generated during framework startup process

@@ -16,11 +16,14 @@ type LogfFunc func(string, ...any)
 
 var (
 	outLog   = log.New(os.Stdout, "", 0)
+	debugLog = log.New(os.Stdout, "\033[32mDEBUG\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	infoLog  = log.New(os.Stdout, "\033[34mINFO\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	warnLog  = log.New(os.Stdout, "\033[33mWARN\033[0m ", log.LstdFlags|log.Lmsgprefix|log.Lshortfile)
 	errorLog = log.New(os.Stdout, "\033[31mERROR\033[0m ", log.LstdFlags|log.Lmsgprefix)
 
 	OUT    LogFunc
+	DEBUG  LogFunc
+	DEBUGF LogfFunc
 	INFO   LogFunc
 	INFOF  LogfFunc
 	WARN   LogFunc
@@ -32,6 +35,8 @@ var (
 // LogOutput Custom logging middleware constraint interface
 type LogOutput interface {
 	OUT(...any)
+	DEBUG(...any)
+	DEBUGF(string, ...any)
 	INFO(...any)
 	INFOF(string, ...any)
 	WARN(...any)
@@ -59,6 +64,12 @@ func init() {
 	if OUT == nil {
 		OUT = outLog.Println
 	}
+	if DEBUG == nil {
+		DEBUG = debugLog.Println
+	}
+	if DEBUGF == nil {
+		DEBUGF = debugLog.Printf
+	}
 	if INFO == nil {
 		INFO = infoLog.Println
 	}
@@ -83,6 +94,8 @@ func init() {
 func CustomLogOutput(l LogOutput) {
 	// Method attribute assignment
 	OUT = l.OUT
+	DEBUG = l.DEBUG
+	DEBUGF = l.DEBUGF
 	INFO = l.INFO
 	INFOF = l.INFOF
 	WARN = l.WARN
@@ -92,6 +105,7 @@ func CustomLogOutput(l LogOutput) {
 
 	// Empty to free memory
 	outLog = nil
+	debugLog = nil
 	infoLog = nil
 	warnLog = nil
 	errorLog = nil
