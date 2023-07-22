@@ -87,6 +87,7 @@ func Get(u, method string, r *http.Request) (string, RouteModel) {
 				r.Form.Set(part[1:], parts[i])
 			}
 		}
+		// Handling other path parameters carried
 		if r.URL.RawQuery != "" {
 			query := r.URL.Query()
 			for k, v := range query {
